@@ -1,0 +1,273 @@
+assert_spec arm_v8a
+
+create_boot_directory
+import_from_depot [depot_user]/pkg/[drivers_interactive_pkg] \
+                  [depot_user]/src/init \
+                  [depot_user]/src/nitpicker \
+                  [depot_user]/src/dynamic_rom \
+                  [depot_user]/src/rom_reporter \
+                  [depot_user]/src/test-capture \
+                  [depot_user]/pkg/usb_webcam
+
+build {
+	core timer
+	server/report_rom
+	drivers/platform/imx8mq
+	drivers/usb_host/imx8mq
+	app/usb_webcam
+}
+
+install_config {
+<config verbose="yes">
+	<parent-provides>
+		<service name="ROM"/>
+		<service name="IRQ"/>
+		<service name="IO_MEM"/>
+		<service name="IO_PORT"/>
+		<service name="PD"/>
+		<service name="RM"/>
+		<service name="CPU"/>
+		<service name="LOG"/>
+	</parent-provides>
+	<default-route>
+		<any-service> <parent/> <any-child/> </any-service>
+	</default-route>
+	<default caps="100"/>
+
+	<start name="timer">
+		<resource name="RAM" quantum="1M"/>
+		<provides><service name="Timer"/></provides>
+	</start>
+
+	<start name="platform_drv" caps="150">
+		<binary name="imx8mq_platform_drv"/>
+		<resource name="RAM" quantum="1M"/>
+		<provides> <service name="Platform"/> </provides>
+		<config>
+
+			<device name="dcss" type="nxp,imx8mq-dcss">
+				<io_mem       address="0x32e00000" size="0x30000"/>
+				<irq          number="50"/>
+				<clock        name="display_apb_clk_root"
+				              driver_name="apb"/>
+				<clock        name="display_axi_clk_root"
+				              parent="system_pll1_clk"
+				              rate="800000000"
+				              driver_name="axi"/>
+				<clock        name="display_rtrm_clk_root"
+				              parent="system_pll1_clk"
+				              rate="400000000"
+				              driver_name="rtrm"/>
+				<clock        name="video_pll1_clk"
+				              parent="25m_ref_clk"
+				              rate="1200000000" />
+				<clock        name="display_dtrc_clk_root"
+				              driver_name="dtrc"/>
+				<clock        name="dc_pixel_clk_root"
+				              parent="video_pll1_clk"
+				              rate="120000000"
+				              driver_name="pix"/>
+				<property     name="disp-dev"   value="hdmi_disp"/>
+			</device>
+
+			<device name="hdmi" type="fsl,imx8mq-hdmi">
+				<io_mem       address="0x32c00000" size="0x100000"/>
+				<io_mem       address="0x32e40000" size="0x40000"/>
+				<io_mem       address="0x32e2f000" size="0x10"/>
+				<irq          number="48"/>
+				<irq          number="57"/>
+			</device>
+
+			<device name="src" type="fsl,imx8mq-src">
+				<io_mem address="0x30390000" size="0x10000"/>
+			</device>
+
+			<device name="mipi_dsi" type="fsl,imx8mq-mipi-dsi_drm">
+				<io_mem       address="0x30a00000" size="0x1000"/>
+				<irq          number="66"/>
+				<power-domain name="mipi"/>
+				<clock        name="mipi_dsi_phy_ref_clk_root"
+				              parent="video_pll1_clk"
+				              rate="24000000"
+				              driver_name="phy_ref"/>
+				<clock        name="mipi_dsi_esc_rx_clk_root"
+				              parent="system_pll1_div10"
+				              rate="80000000"
+				              driver_name="rx_esc"/>
+				<clock        name="mipi_dsi_core_clk_root"
+				              parent="system_pll1_div3"
+				              rate="266000000"
+				              driver_name="core"/>
+			</device>
+
+			<device name="dwc3_usb_1" type="snps,dwc3">
+				<io_mem       address="0x38200000" size="0x10000"/>
+				<irq          number="73"/>
+				<power-domain name="usb_otg_2"/>
+				<clock        name="usb_ctrl2_gate"
+				              driver_name="bus_early"/>
+				<clock        name="usb_core_ref_clk_root"
+				              parent="system_pll1_div8"
+				              rate="100000000"
+				              driver_name="ref"/>
+				<clock        name="usb_bus_clk_root"
+				              parent="system_pll2_div2"
+				              rate="500000000"
+				              driver_name="ref"/>
+			</device>
+
+			<device name="phy_1" type="fsl,imx8mq-usb-phy">
+				<io_mem address="0x382f0040" size="0x40"/>
+				<clock  name="usb_phy2_gate"
+				        driver_name="phy"/>
+				<clock  name="usb_phy_ref_clk_root"
+				        parent="system_pll1_div8"
+				        rate="100000000"/>
+			</device>
+			<policy label="usb_host_drv -> " info="yes">
+				<device name="dwc3_usb_1"/>
+				<device name="phy_1"/>
+			</policy>
+			<policy label="fb_drv -> "  info="yes">
+				<device name="dcss"/>
+				<device name="hdmi"/>
+				<device name="mipi_dsi"/>
+				<device name="src"/>
+			</policy>
+		</config>
+		<route> <any-service> <parent/> </any-service> </route>
+	</start>
+
+	<start name="report_rom">
+		<resource name="RAM" quantum="2M"/>
+		<provides> <service name="Report"/> <service name="ROM"/> </provides>
+		<config verbose="yes">
+			<default-policy report="usb_host_drv -> devices"/>
+		</config>
+		<route> <any-service> <parent/> </any-service> </route>
+	</start>
+
+	<start name="usb_host_drv" caps="250">
+		<binary name="imx8mq_usb_host_drv"/>
+		<resource name="RAM" quantum="40M"/>
+		<provides> <service name="Usb"/> </provides>
+		<route>
+			<service name="ROM" label="dtb"> <parent label="imx8mq_usb_host_drv-imx8mq-evk.dtb"/> </service>
+			<service name="RM">       <parent/> </service>
+			<service name="ROM">      <parent/> </service>
+			<service name="PD">       <parent/> </service>
+			<service name="CPU">      <parent/> </service>
+			<service name="LOG">      <parent/> </service>
+			<service name="Timer">    <child name="timer"/>        </service>
+			<service name="Report">   <child name="report_rom"/>   </service>
+			<service name="Platform"> <child name="platform_drv"/> </service>
+		</route>
+		<config>
+			<policy label_prefix="webcam" product_id="0x9c1" vendor_id="0x46d"/>
+		</config>
+	</start>
+
+	<start name="fb_drv" caps="250">
+		<binary name="imx8_fb_drv"/>
+		<resource name="RAM" quantum="40M"/>
+		<route>
+			<service name="ROM" label="config"> <parent label="fb_drv.config"/> </service>
+			<service name="RM">       <parent/> </service>
+			<service name="ROM">      <parent/> </service>
+			<service name="PD">       <parent/> </service>
+			<service name="CPU">      <parent/> </service>
+			<service name="LOG">      <parent/> </service>
+			<service name="Timer">    <child name="timer"/>        </service>
+			<service name="Capture">  <child name="nitpicker"/>    </service>
+			<service name="Platform"> <child name="platform_drv"/> </service>
+		</route>
+	</start>
+
+	<start name="nitpicker" priority="-1" caps="150">
+		<resource name="RAM" quantum="12M"/>
+		<provides>
+			<service name="Gui"/> <service name="Capture"/> <service name="Event"/>
+		</provides>
+		<config>
+			<capture/>
+			<report focus="yes" hover="yes" />
+			<domain name="" layer="3" content="client" label="no" focus="click" hover="always"/>
+			<default-policy domain=""/>
+		</config>
+		<route>
+			<any-service> <parent/> <any-child /> </any-service>
+		</route>
+	</start>
+
+	<start name="test-capture" priority="-1">
+		<resource name="RAM" quantum="8M"/>
+		<config period_ms="20" width="640" height="480">
+			<view xpos="100" ypos="100"/> <!--view xpos="800" ypos="600"/-->
+		</config>
+		<route>
+			<service name="Gui"> <child name="nitpicker"/> </service>
+			<service name="Capture"> <child name="webcam"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+	</start>
+
+	<start name="dynamic-webcam">
+		<binary name="dynamic_rom"/>
+		<resource name="RAM" quantum="1M"/>
+		<provides> <service name="ROM"/> </provides>
+		<config verbose="yes">
+			<rom name="capture">
+				<inline>
+					<capture enabled="true"/>
+				</inline>
+				<sleep milliseconds="80000"/>
+				<inline>
+					<capture enabled="no"/>
+				</inline>
+				<sleep milliseconds="3000"/>
+			</rom>
+		</config>
+		<route>
+			<service name="Timer"> <child name="timer"/> </service>
+			<any-service> <parent/> </any-service>
+		</route>
+	</start>
+
+	<start name="rom_reporter">
+		<resource name="RAM" quantum="1MB"/>
+		<provides> <service name="Report"/> </provides>
+		<config>
+			<rom label="capture"/>
+		</config>
+		<route>
+			<service name="ROM" label="capture"> <child name="dynamic-webcam"/> </service>
+			<service name="Report"> <child name="webcam" label="capture"/> </service>
+			<any-service> <parent /> </any-service>
+		</route>
+	</start>
+
+	<start name="webcam" caps="800" priority="-1">
+		<binary name="init"/>
+		<resource name="RAM" quantum="64MB"/>
+		<route>
+			<service name="ROM" label="config"> <parent label="usb_webcam.config"/> </service>
+			<service name="Timer"> <child name="timer"/> </service>
+			<service name="Usb"> <child name="usb_host_drv"/> </service>
+			<any-service> <parent /> </any-service>
+		</route>
+		<provides> <service name="Capture"/> <service name="Report"/> </provides>
+	</start>
+
+</config>}
+
+build_boot_image {
+	core timer
+	report_rom
+	imx8mq_platform_drv
+	imx8mq_usb_host_drv
+	imx8mq_usb_host_drv-imx8mq-evk.dtb
+	usb_webcam
+	libusb.lib.so libuvc.lib.so
+}
+
+run_genode_until forever
