@@ -15,6 +15,8 @@ MIRROR_FROM_REP_DIR  := src/drivers/$(DRIVER)/imx8mq \
                         src/include/imx8mq \
                         src/lib/imx8mq
 
+MIRROR_FROM_REP_DIR  += $(MIRROR_FROM_REP_DIR_ADDITIONAL)
+
 content: LICENSE $(MIRROR_FROM_REP_DIR) $(MIRROR_FROM_PORT_DIR) $(MIRROR_FROM_DDE_DIR)
 
 $(MIRROR_FROM_REP_DIR):
