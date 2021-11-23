@@ -68,3 +68,45 @@ Genode::Dataspace_capability genode_lookup_cap(void *drm, unsigned long long off
 
 	return Lx_kit::env().memory.attached_dataspace_cap(addr);
 }
+
+
+/********************************
+ ** LOG probe helper for Linux **
+ ********************************/
+
+enum { MAX_PROBES = 32 };
+
+static Genode::Log_tsc_probe::Stats *_probe_stats[MAX_PROBES];
+static Genode::Constructible<Genode::Log_tsc_probe> _probes[MAX_PROBES];
+
+void *genode_log_tsc_stats(unsigned id, unsigned number)
+{
+	if (id > MAX_PROBES)
+		return nullptr;
+
+	if (!_probe_stats[id])
+		_probe_stats[id] = new (Lx_kit::env().heap) Genode::Log_tsc_probe::Stats(number);
+
+	return _probe_stats[id];
+}
+
+
+void genode_log_tsc_init(void *p, unsigned id, char const *name)
+{
+	if (!p || id > MAX_PROBES)
+		return;
+
+	Genode::Log_tsc_probe::Stats &stats = *reinterpret_cast<Genode::Log_tsc_probe::Stats*>(p);
+
+	if (!_probes[id].constructed())
+		_probes[id].construct(stats, name);
+}
+
+
+void genode_log_tsc_destroy(unsigned id)
+{
+	if (id > MAX_PROBES)
+		return;
+
+	_probes[id].destruct();
+}

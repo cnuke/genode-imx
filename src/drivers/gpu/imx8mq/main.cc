@@ -32,6 +32,13 @@
 #include <lx_kit/env.h>
 #include <lx_kit/init.h>
 
+// #undef GENODE_LOG_TSC_NAMED
+// #define GENODE_LOG_TSC_NAMED(...)
+
+#define GENODE_LOG(...) do { Genode::log(__VA_ARGS__); } while (0)
+#undef GENODE_LOG
+#define GENODE_LOG(...)
+
 
 /* local includes */
 #include "lx_drm.h"
@@ -413,6 +420,8 @@ extern "C" int run_lx_user_task(void *p)
 			args.local_request->success = false;
 			switch (args.local_request->type) {
 			case Gpu::Local_request::Type::OPEN:
+			{
+				GENODE_LOG_TSC_NAMED(1, "OPEN");
 				if (!args.drm) {
 					args.drm = lx_drm_open();
 					if (!args.drm)
@@ -423,11 +432,15 @@ extern "C" int run_lx_user_task(void *p)
 					args.local_request->success = true;
 				}
 				break;
+			}
 			case Gpu::Local_request::Type::CLOSE:
+			{
+				// GENODE_LOG_TSC_NAMED(1, "CLOSE");
 				lx_drm_close(args.drm);
 				args.drm = nullptr;
 				args.local_request->success = true;
 				break;
+			}
 			case Gpu::Local_request::Type::INVALID:
 				break;
 			}
@@ -441,6 +454,7 @@ extern "C" int run_lx_user_task(void *p)
 			switch (r.operation.type) {
 			case OP::ALLOC:
 			{
+				GENODE_LOG_TSC_NAMED(1000, "ALLOC");
 				uint32_t const size = r.operation.size;
 				uint32_t handle;
 
@@ -468,6 +482,7 @@ extern "C" int run_lx_user_task(void *p)
 			}
 			case OP::FREE:
 			{
+				// GENODE_LOG_TSC_NAMED(1, "FREE");
 				bool found = false;
 				buffers.with_handle(r.operation.id, [&] (uint32_t const handle) {
 					(void)lx_drm_ioctl_gem_close(args.drm, handle);
@@ -482,6 +497,7 @@ extern "C" int run_lx_user_task(void *p)
 			}
 			case OP::EXEC:
 			{
+				GENODE_LOG_TSC_NAMED(60, "EXEC");
 				void *gem_submit = buffers.local_addr(r.operation.id);
 				if (!gem_submit)
 					break;
@@ -525,6 +541,7 @@ extern "C" int run_lx_user_task(void *p)
 			}
 			case OP::WAIT:
 			{
+				// GENODE_LOG_TSC_NAMED(1, "WAIT");
 				uint32_t const fence_id = r.operation.seqno.value;
 
 				if (lx_drm_ioctl_etnaviv_wait_fence(args.drm, fence_id))
@@ -535,6 +552,7 @@ extern "C" int run_lx_user_task(void *p)
 			}
 			case OP::MAP:
 			{
+				GENODE_LOG_TSC_NAMED(10000, "MAP");
 				buffers.with_handle(r.operation.id, [&] (uint32_t const handle) {
 					int const attrs  = r.operation.lx_mapping_attrs();
 
@@ -547,6 +565,7 @@ extern "C" int run_lx_user_task(void *p)
 			}
 			case OP::UNMAP:
 			{
+				GENODE_LOG_TSC_NAMED(10000, "UNMAP");
 				buffers.with_handle(r.operation.id, [&] (uint32_t const handle) {
 					(void)lx_drm_ioctl_etnaviv_cpu_fini(args.drm, handle);
 					r.success = true;
@@ -747,6 +766,10 @@ struct Gpu::Session_component : public Genode::Session_object<Gpu::Session>
 		Gpu::Sequence_number exec_buffer(Gpu::Buffer_id id,
 		                                 Genode::size_t) override
 		{
+			GENODE_LOG("OP: ", __func__);
+			static unsigned call_count = 0;
+			if (++call_count % 60 == 0)
+				Genode::log("TSC exec_buffer");
 			Gpu::Request r = Gpu::Request::create(Gpu::Operation::Type::EXEC);
 			r.operation.id = id;
 
@@ -765,6 +788,7 @@ struct Gpu::Session_component : public Genode::Session_object<Gpu::Session>
 
 		bool complete(Gpu::Sequence_number seqno) override
 		{
+			GENODE_LOG("OP: ", __func__);
 			Gpu::Request r = Gpu::Request::create(Gpu::Operation::Type::WAIT);
 			r.operation.seqno = seqno;
 
@@ -781,12 +805,14 @@ struct Gpu::Session_component : public Genode::Session_object<Gpu::Session>
 
 		void completion_sigh(Genode::Signal_context_capability sigh) override
 		{
+			GENODE_LOG("OP: ", __func__);
 			_completion_sigh = sigh;
 		}
 
 		Genode::Dataspace_capability alloc_buffer(Gpu::Buffer_id id,
 		                                          Genode::size_t size) override
 		{
+			GENODE_LOG("OP: ", __func__);
 			Gpu::Request r = Gpu::Request::create(Gpu::Operation::Type::ALLOC);
 			r.operation.id   = id;
 			r.operation.size = size;
@@ -804,6 +830,7 @@ struct Gpu::Session_component : public Genode::Session_object<Gpu::Session>
 
 		void free_buffer(Gpu::Buffer_id id) override
 		{
+			GENODE_LOG("OP: ", __func__);
 			Gpu::Request r = Gpu::Request::create(Gpu::Operation::Type::FREE);
 			r.operation.id = id;
 
@@ -816,6 +843,7 @@ struct Gpu::Session_component : public Genode::Session_object<Gpu::Session>
 		                                        bool /* aperture */,
 		                                        Gpu::Mapping_attributes attrs) override
 		{
+			GENODE_LOG("OP: ", __func__);
 			Gpu::Request r = Gpu::Request::create(Gpu::Operation::Type::MAP);
 			r.operation.id            = id;
 			r.operation.mapping_attrs = attrs;
@@ -833,6 +861,7 @@ struct Gpu::Session_component : public Genode::Session_object<Gpu::Session>
 
 		void unmap_buffer(Gpu::Buffer_id id) override
 		{
+			GENODE_LOG("OP: ", __func__);
 			Gpu::Request r = Gpu::Request::create(Gpu::Operation::Type::UNMAP);
 			r.operation.id = id;
 

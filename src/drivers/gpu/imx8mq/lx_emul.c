@@ -357,10 +357,16 @@ int lx_drm_ioctl_etnaviv_gem_submit(void *lx_drm_prv, unsigned long arg,
 	int err;
 	struct drm_etnaviv_gem_submit *submit;
 
+	static void *submit_stats = NULL;
+	if (!submit_stats)
+		submit_stats = genode_log_tsc_stats(31, 60);
+
+	genode_log_tsc_init(submit_stats, 31, "gem submit");
 	err = lx_drm_ioctl(lx_drm_prv, DRM_IOCTL_ETNAVIV_GEM_SUBMIT, arg);
 	if (err) {
 		return err;
 	}
+	genode_log_tsc_destroy(0);
 
 	submit = (struct drm_etnaviv_gem_submit*)arg;
 

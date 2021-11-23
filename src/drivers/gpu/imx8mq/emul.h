@@ -23,6 +23,13 @@ void  emul_free_shmem_file_buffer(void *);
 
 unsigned long emul_user_copy(void *, void const*, unsigned long);
 
+
+void *genode_log_tsc_stats(unsigned, unsigned);
+
+void genode_log_tsc_init(void *, unsigned, char const *);
+void genode_log_tsc_destroy(unsigned);
+
+
 #ifdef __cplusplus
 }
 #endif
