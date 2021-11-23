@@ -22,6 +22,9 @@ set build_components {
 
 	app/glmark2
 	test/mesa_demo/gears
+
+	app/top_view
+	app/menu_view
 }
 
 build $build_components
@@ -98,7 +101,6 @@ append config {
 		<resource name="RAM" quantum="1M"/>
 	</start>
 
-<!--
 	<start name="gears" caps="500">
 		<affinity xpos="2" width="1"/>
 		<binary name="gears"/>
@@ -121,8 +123,8 @@ append config {
 			<any-service> <parent/> <any-child/> </any-service>
 		</route>
 	</start>
--->
 
+<!--
 	<start name="glmark2" caps="500">
 		<affinity xpos="1" width="1"/>
 		<resource name="RAM" quantum="160M"/>
@@ -158,6 +160,7 @@ append config {
 			<any-service> <parent/> <any-child/> </any-service>
 		</route>
 	</start>
+-->
 
 	<start name="imx8mq_gpu_drv" caps="500">
 		<resource name="RAM" quantum="128M"/>
@@ -177,6 +180,87 @@ append config {
 		</route>
 	</start>
 
+<!-- TOP VIEW -->
+
+	<start name="report_rom_hover">
+		<binary name="report_rom"/>
+		<resource name="RAM" quantum="1M"/>
+		<provides> <service name="Report"/> <service name="ROM"/> </provides>
+		<config verbose="no">
+			<policy label="top_view -> hover" report="menu_view -> hover"/>
+		</config>
+	</start>
+
+	<start name="fonts_fs" caps="300">
+		<resource name="RAM" quantum="8M"/>
+		<binary name="vfs"/>
+		<route>
+			<service name="ROM" label="config"> <parent label="fonts_fs.config"/> </service>
+			<any-service> <parent/> </any-service>
+		</route>
+		<provides> <service name="File_system"/> </provides>
+	</start>
+
+	<start name="report_rom_dialog">
+		<binary name="report_rom"/>
+		<resource name="RAM" quantum="1M"/>
+		<provides> <service name="Report"/> <service name="ROM"/> </provides>
+		<config verbose="no">
+			<policy label="menu_view -> dialog" report="top_view -> dialog"/>
+		</config>
+	</start>
+
+	<start name="report_rom_graph">
+		<binary name="report_rom"/>
+		<resource name="RAM" quantum="1M"/>
+		<provides> <service name="Report"/> <service name="ROM"/> </provides>
+		<config verbose="no">
+			<policy label="graph -> graph" report="top_view -> graph"/>
+		</config>
+	</start>
+
+	<start name="menu_view" caps="200" priority="-1">
+		<affinity xpos="3" width="1"/>
+		<resource name="RAM" quantum="16M"/>
+		<config xpos="200" ypos="100">
+			<report hover="yes"/>
+			<libc stderr="/dev/log"/>
+			<vfs>t
+				<tar name="menu_view_styles.tar" />
+				<dir name="dev"> <log/> </dir>
+				<dir name="fonts"> <fs label="fonts"/> </dir>
+			</vfs>
+		</config>
+		<route>
+			<service name="ROM" label="dialog"> <child name="report_rom_dialog" /> </service>
+			<service name="Report" label="hover"> <child name="report_rom_hover"/> </service>
+			<service name="File_system" label="fonts"> <child name="fonts_fs"/> </service>
+			<service name="Gui"> <child name="nitpicker"/> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+	</start>
+
+	<start name="top_view" priority="0">
+		<affinity xpos="3" width="1"/>
+		<resource name="RAM" quantum="2M"/>
+		<config view_ms="1000" trace_ms="1000" report="yes" log="no"
+		        store="no" report_config="no"
+		        view="list" list="threads">
+
+			<cpu xpos="0" ypos="0" show="true" threads="8"/>
+			<cpu xpos="1" ypos="0" show="true" threads="5"/>
+			<cpu xpos="2" ypos="0" show="true" threads="5"/>
+			<cpu xpos="3" ypos="0" show="true" threads="5"/>
+		</config>
+
+		<route>
+			<service name="ROM"    label="hover"> <child name="report_rom_hover" /> </service>
+			<service name="Report" label="dialog"> <child name="report_rom_dialog" /> </service>
+			<service name="Report" label="graph"> <child name="report_rom_graph" /> </service>
+			<service name="Report" label="config"> <child name="report_rom_config" /> </service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+	</start>
 </config>}
 
 install_config $config
@@ -201,6 +285,7 @@ append boot_modules {
 	gears
 
 	usb_policy numlock
+	menu_view menu_view_styles.tar top_view
 }
 
 lappend boot_modules [imx8mq_gpu_dtb_file]
