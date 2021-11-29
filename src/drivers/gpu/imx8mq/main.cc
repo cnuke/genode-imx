@@ -768,8 +768,11 @@ struct Gpu::Session_component : public Genode::Session_object<Gpu::Session>
 		{
 			GENODE_LOG("OP: ", __func__);
 			static unsigned call_count = 0;
-			if (++call_count % 60 == 0)
+			if (++call_count % 60 == 0) {
+				Genode::error("env: caps: ", _env.pd().avail_caps(), " ", _env.pd().cap_quota(),
+				               " ram: ", _env.pd().avail_ram(), " ", _env.pd().ram_quota());
 				Genode::log("TSC exec_buffer");
+			}
 			Gpu::Request r = Gpu::Request::create(Gpu::Operation::Type::EXEC);
 			r.operation.id = id;
 
