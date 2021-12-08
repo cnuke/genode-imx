@@ -25,7 +25,17 @@ set build_components {
 
 	app/top_view
 	app/menu_view
+
+	server/cpu_sampler
 }
+
+
+if {[have_spec foc] || [have_spec nova]} {
+	lappend build_components lib/cpu_sampler_platform-$::env(KERNEL)
+} else {
+	lappend build_components lib/cpu_sampler_platform-generic
+}
+
 
 build $build_components
 
@@ -101,6 +111,7 @@ append config {
 		<resource name="RAM" quantum="1M"/>
 	</start>
 
+<!--
 	<start name="gears" caps="500">
 		<affinity xpos="2" width="1"/>
 		<binary name="gears"/>
@@ -123,8 +134,8 @@ append config {
 			<any-service> <parent/> <any-child/> </any-service>
 		</route>
 	</start>
+-->
 
-<!--
 	<start name="glmark2" caps="500">
 		<affinity xpos="1" width="1"/>
 		<resource name="RAM" quantum="160M"/>
@@ -160,7 +171,21 @@ append config {
 			<any-service> <parent/> <any-child/> </any-service>
 		</route>
 	</start>
--->
+
+	<start name="cpu_sampler">
+		<resource name="RAM" quantum="4M"/>
+		<provides>
+			<service name="CPU"/>
+		</provides>
+		<config sample_interval_ms="100" sample_duration_s="30">
+			<policy label="imx8mq_gpu_drv -> ep"/>
+			<policy label="imx8mq_gpu_drv -> imx8mq_gpu_drv"/>
+			<policy label="imx8mq_gpu_drv -> signal_proxy"/>
+		</config>
+		<route>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+	</start>
 
 	<start name="imx8mq_gpu_drv" caps="500">
 		<resource name="RAM" quantum="128M"/>
@@ -174,6 +199,7 @@ append config {
 				<parent label="} [imx8mq_gpu_dtb_file] {"/>
 			</service>
 			<service name="Timer"> <child name="timer"/> </service>
+			<!-- <service name="CPU"> <child name="cpu_sampler"/> </service> -->
 			<service name="Gui"> <child name="nitpicker"/> </service>
 			<service name="Platform"> <child name="drivers" label="runtime -> gpu"/> </service>
 			<any-service> <parent/> </any-service>
@@ -189,6 +215,9 @@ append config {
 		<config verbose="no">
 			<policy label="top_view -> hover" report="menu_view -> hover"/>
 		</config>
+		<route>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
 	</start>
 
 	<start name="fonts_fs" caps="300">
@@ -199,6 +228,9 @@ append config {
 			<any-service> <parent/> </any-service>
 		</route>
 		<provides> <service name="File_system"/> </provides>
+		<route>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
 	</start>
 
 	<start name="report_rom_dialog">
@@ -208,6 +240,9 @@ append config {
 		<config verbose="no">
 			<policy label="menu_view -> dialog" report="top_view -> dialog"/>
 		</config>
+		<route>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
 	</start>
 
 	<start name="report_rom_graph">
@@ -217,6 +252,9 @@ append config {
 		<config verbose="no">
 			<policy label="graph -> graph" report="top_view -> graph"/>
 		</config>
+		<route>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
 	</start>
 
 	<start name="menu_view" caps="200" priority="-1">
@@ -272,6 +310,16 @@ if {![file exists bin/numlock]} {
 	exec echo '<empty/>' > bin/numlock
 }
 
+# evaluated by the run tool
+proc binary_name_cpu_sampler_platform_lib_so { } {
+	if {[have_spec foc] || [have_spec nova]} {
+		return "cpu_sampler_platform-$::env(KERNEL).lib.so"
+	} else {
+		return "cpu_sampler_platform-generic.lib.so"
+	}
+}
+
+
 append boot_modules {
 	libc.lib.so vfs.lib.so libm.lib.so
 	egl.lib.so mesa.lib.so stdcxx.lib.so
@@ -286,6 +334,8 @@ append boot_modules {
 
 	usb_policy numlock
 	menu_view menu_view_styles.tar top_view
+
+	cpu_sampler cpu_sampler_platform.lib.so
 }
 
 lappend boot_modules [imx8mq_gpu_dtb_file]
