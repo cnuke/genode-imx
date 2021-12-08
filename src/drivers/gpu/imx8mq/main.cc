@@ -32,8 +32,8 @@
 #include <lx_kit/env.h>
 #include <lx_kit/init.h>
 
-// #undef GENODE_LOG_TSC_NAMED
-// #define GENODE_LOG_TSC_NAMED(...)
+#undef GENODE_LOG_TSC_NAMED
+#define GENODE_LOG_TSC_NAMED(...)
 
 #define GENODE_LOG(...) do { Genode::log(__VA_ARGS__); } while (0)
 #undef GENODE_LOG
@@ -207,6 +207,36 @@ struct Gpu::Buffer
 extern "C" void lx_emul_mem_cache_clean_invalidate(const void * addr,
                                                    unsigned long size);
 
+
+template <typename FUNC>
+static inline void cache_maintainance(Genode::addr_t const base,
+                                      Genode::size_t const size,
+                                      FUNC & func)
+{
+	Genode::addr_t start     = (Genode::addr_t) base;
+	Genode::addr_t const end = base + size;
+	enum { CACHE_LINE_SIZE = 64 };
+	for (; start < end; start += CACHE_LINE_SIZE)
+		func(start);
+}
+
+
+extern "C" void local_lx_emul_mem_cache_clean_invalidate(const void * addr,
+                                                         unsigned long size)
+{
+	/* memory barrier */
+	asm volatile ("dsb #15" ::: "memory");
+
+	auto lambda = [] (Genode::addr_t const base) {
+		asm volatile("dc civac, %0" :: "r" (base)); };
+
+	cache_maintainance((Genode::addr_t)addr, size, lambda);
+
+	asm volatile("dsb sy");
+	asm volatile("isb");
+}
+
+
 struct Gpu::Buffer_space : Genode::Id_space<Buffer>
 {
 	Allocator &_alloc;
@@ -233,14 +263,42 @@ struct Gpu::Buffer_space : Genode::Id_space<Buffer>
 		bool valid() const { return _valid; }
 	};
 
-	Lx_handle lookup_and_flush(Gpu::Buffer_id id)
+	struct Lx_mapping
+	{
+		bool readable;
+		bool writeable;
+
+		bool rw() const
+		{
+			return writeable && readable;
+		}
+
+		bool ro() const
+		{
+			return readable && !writeable;
+		}
+
+		bool wo() const
+		{
+			return !readable && writeable;
+		}
+	};
+
+	Lx_handle lookup_and_flush(Gpu::Buffer_id id, Lx_mapping mapping)
 	{
 		Lx_handle result { 0, false };
 
 		apply<Buffer>(id, [&] (Buffer &b) {
+			(void)mapping;
 
-			lx_emul_mem_cache_clean_invalidate(b.attached_ds.local_addr<void>(),
-			                                   b.attached_ds.size());
+			// if (mapping.ro())
+				lx_emul_mem_cache_clean_invalidate(b.attached_ds.local_addr<void>(),
+				                                         b.attached_ds.size());
+			// else
+
+			// if (mapping.ro())
+			// 	local_lx_emul_mem_cache_invalidate(b.attached_ds.local_addr<void>(),
+			// 	                                   b.attached_ds.size());
 
 			result = { b.handle, true };
 		});
@@ -505,23 +563,28 @@ extern "C" int run_lx_user_task(void *p)
 				int err = 0;
 				unsigned nr_bos = lx_drm_gem_submit_bo_count(gem_submit);
 				for (unsigned i = 0; i < nr_bos; i++) {
-					unsigned *bo_handle = lx_drm_gem_submit_bo_handle(gem_submit, i);
-					if (!bo_handle) {
+					struct lx_bo_handle bo_handle = lx_drm_gem_submit_bo_handle(gem_submit, i);
+					if (!bo_handle.handle) {
 						error("lx_drm_gem_submit_bo_handle: index: ", i,
 						       " invalid bo handle");
 						err = -1;
 						break;
 					}
-					using LX = Gpu::Buffer_space::Lx_handle;
-					Gpu::Buffer_id id { .value = *bo_handle };
-					LX handle = buffers.lookup_and_flush(id);
+					using LX  = Gpu::Buffer_space::Lx_handle;
+					using LXM = Gpu::Buffer_space::Lx_mapping;
+					Gpu::Buffer_id id { .value = *(bo_handle.handle) };
+					LXM mapping {
+						.readable  = (bool)(bo_handle.flags & 0x0001),
+						.writeable = (bool)(bo_handle.flags & 0x0002)
+					};
+					LX handle = buffers.lookup_and_flush(id, mapping);
 					if (!handle.valid()) {
-						error("could not look up handle for id: ", *bo_handle);
+						error("could not look up handle for id: ", *(bo_handle.handle));
 						err = -1;
 						break;
 					}
 					/* replace client-local buffer id with kernel-local handle */
-					*bo_handle = handle.value;
+					*(bo_handle.handle) = handle.value;
 				}
 
 				Genode::uint32_t fence_id;
@@ -767,12 +830,12 @@ struct Gpu::Session_component : public Genode::Session_object<Gpu::Session>
 		                                 Genode::size_t) override
 		{
 			GENODE_LOG("OP: ", __func__);
-			static unsigned call_count = 0;
-			if (++call_count % 60 == 0) {
-				Genode::error("env: caps: ", _env.pd().avail_caps(), " ", _env.pd().cap_quota(),
-				               " ram: ", _env.pd().avail_ram(), " ", _env.pd().ram_quota());
-				Genode::log("TSC exec_buffer");
-			}
+			// static unsigned call_count = 0;
+			// if (++call_count % 60 == 0) {
+			// 	Genode::error("env: caps: ", _env.pd().avail_caps(), " ", _env.pd().cap_quota(),
+			// 	               " ram: ", _env.pd().avail_ram(), " ", _env.pd().ram_quota());
+			// 	Genode::log("TSC exec_buffer");
+			// }
 			Gpu::Request r = Gpu::Request::create(Gpu::Operation::Type::EXEC);
 			r.operation.id = id;
 

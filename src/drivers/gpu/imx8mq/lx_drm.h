@@ -24,7 +24,12 @@ void  lx_drm_close(void *);
 int       lx_drm_ioctl_etnaviv_gem_param(void *, unsigned char, unsigned long long*);
 int       lx_drm_ioctl_etnaviv_gem_submit(void *, unsigned long, unsigned int*);
 unsigned  lx_drm_gem_submit_bo_count(void const*);
-unsigned *lx_drm_gem_submit_bo_handle(void*, unsigned);
+struct lx_bo_handle
+{
+	unsigned *handle;
+	unsigned  flags;
+};
+struct lx_bo_handle lx_drm_gem_submit_bo_handle(void*, unsigned);
 int       lx_drm_ioctl_etnaviv_gem_new(void *, unsigned long, unsigned int *);
 int       lx_drm_ioctl_etnaviv_gem_info(void *, unsigned int, unsigned long long *);
 int       lx_drm_ioctl_etnaviv_cpu_prep(void *, unsigned int, int);

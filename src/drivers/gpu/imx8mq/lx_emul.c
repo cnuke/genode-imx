@@ -149,7 +149,7 @@ unsigned lx_drm_gem_submit_bo_count(void const *p)
 }
 
 
-unsigned *lx_drm_gem_submit_bo_handle(void *p, unsigned index)
+struct lx_bo_handle lx_drm_gem_submit_bo_handle(void *p, unsigned index)
 {
 	struct drm_etnaviv_gem_submit * const submit =
 		(struct drm_etnaviv_gem_submit*)p;
@@ -158,7 +158,7 @@ unsigned *lx_drm_gem_submit_bo_handle(void *p, unsigned index)
 		(struct drm_etnaviv_gem_submit_bo*)(submit->bos + (unsigned long)submit);
 
 	struct drm_etnaviv_gem_submit_bo * const bo = &bos[index];
-	return &bo->handle;
+	return (struct lx_bo_handle) { .handle = &bo->handle, .flags = bo->flags };
 }
 
 
