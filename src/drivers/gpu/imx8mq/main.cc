@@ -226,14 +226,15 @@ struct Gpu::Buffer_space : Genode::Id_space<Buffer>
 		bool valid() const { return _valid; }
 	};
 
-	Lx_handle lookup_and_flush(Gpu::Buffer_id id)
+	Lx_handle lookup_and_flush(Gpu::Buffer_id id, bool invalidate)
 	{
 		Lx_handle result { 0, false };
 
 		apply<Buffer>(id, [&] (Buffer &b) {
 
-			lx_emul_mem_cache_clean_invalidate(b.attached_ds.local_addr<void>(),
-			                                   b.attached_ds.size());
+			if (invalidate)
+				lx_emul_mem_cache_clean_invalidate(b.attached_ds.local_addr<void>(),
+				                                   b.attached_ds.size());
 
 			result = { b.handle, true };
 		});
@@ -489,23 +490,24 @@ extern "C" int run_lx_user_task(void *p)
 				int err = 0;
 				unsigned nr_bos = lx_drm_gem_submit_bo_count(gem_submit);
 				for (unsigned i = 0; i < nr_bos; i++) {
-					unsigned *bo_handle = lx_drm_gem_submit_bo_handle(gem_submit, i);
-					if (!bo_handle) {
+					lx_bo bo_handle = lx_drm_gem_submit_bo_handle(gem_submit, i);
+					if (!bo_handle.handle) {
 						error("lx_drm_gem_submit_bo_handle: index: ", i,
 						       " invalid bo handle");
 						err = -1;
 						break;
 					}
 					using LX = Gpu::Buffer_space::Lx_handle;
-					Gpu::Buffer_id id { .value = *bo_handle };
-					LX handle = buffers.lookup_and_flush(id);
+					Gpu::Buffer_id id { .value = *bo_handle.handle };
+					bool const flush = bo_handle.flags & 0x0001;
+					LX handle = buffers.lookup_and_flush(id, flush);
 					if (!handle.valid()) {
-						error("could not look up handle for id: ", *bo_handle);
+						error("could not look up handle for id: ", *bo_handle.handle);
 						err = -1;
 						break;
 					}
 					/* replace client-local buffer id with kernel-local handle */
-					*bo_handle = handle.value;
+					*bo_handle.handle = handle.value;
 				}
 
 				Genode::uint32_t fence_id;
