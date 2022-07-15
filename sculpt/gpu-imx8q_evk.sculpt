@@ -1,6 +1,7 @@
 drivers: imx8q_evk
 
 # supplemental depot content added to the system image
+import: raw/imx8q_evk-devices
 import: src/arm_driver_manager
 import: src/event_filter
 import: src/fec_nic_drv
