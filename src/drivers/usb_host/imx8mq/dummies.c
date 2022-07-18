@@ -672,6 +672,5 @@ void account_idle_ticks(unsigned long ticks)
 
 void wake_up_nohz_cpu(int cpu)
 {
-	printk("%s ... called\n", __func__);
 	lx_emul_trace(__func__);
 }
