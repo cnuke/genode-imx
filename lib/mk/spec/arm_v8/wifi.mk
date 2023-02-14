@@ -19,6 +19,7 @@ SRC_CC  += time.cc
 
 SRC_C   += dummies.c
 SRC_C   += lx_emul.c
+SRC_C   += lx_emul_pci.c
 SRC_C   += lx_user.c
 SRC_C   += uplink.c
 SRC_C   += lx_socket_call.c
