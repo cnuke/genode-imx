@@ -87,7 +87,7 @@ CC_OPT_drivers/base/regmap/regmap  += -I$(LX_CONTRIB_DIR)/drivers/base/regmap
 CC_OPT_lib/dynamic_debug           += -Wno-unused-variable
 CC_OPT_lib/vsprintf                += -Wno-unused-variable
 
-# avoid link errors whenever the build config's CC_OLEVEL is set to -O0/-Og
+# avoid build errors because with CC_OLEVEL = -O0/-Og - not supported by Linux
 override CC_OLEVEL := -O2
 
 LX_SRC   = $(shell grep ".*\.c" $(PRG_DIR)/source.list)
