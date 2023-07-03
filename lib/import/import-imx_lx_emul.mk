@@ -84,6 +84,7 @@ $(foreach B,$(BOARDS),$(eval $(DRIVER)-$B.dts: $(MAKEFILE_LIST)))
 $(DRIVER)-%.dts:
 	$(VERBOSE)$(CROSS_DEV_PREFIX)cpp -I$(LX_SRC_DIR)/include \
 	          -x assembler-with-cpp -MMD -P $(LX_SRC_DIR)/${DTS_PATH($*)} |\
+	          sed -s 's/aliases {/aliases\: aliases {/' | \
 	          sed -s 's/intc\:/gic\:/' | \
 	          sed -s 's/interrupt-parent = <\&intc>;/interrupt-parent = <\&gic>;/' | \
 	          sed -s 's/interrupt-parent = <\&gpc>;/interrupt-parent = <\&gic>;/' | \
