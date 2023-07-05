@@ -1,3 +1,5 @@
+REQUIRES = hw
+
 REP_INC_DIR += src/bootstrap/board/imx6q_sabrelite
 
 SRC_CC  += bootstrap/spec/arm/cpu.cc

@@ -1,3 +1,5 @@
+REQUIRES = hw
+
 REP_INC_DIR += src/bootstrap/board/nit6_solox
 
 SRC_CC  += bootstrap/spec/arm/cpu.cc

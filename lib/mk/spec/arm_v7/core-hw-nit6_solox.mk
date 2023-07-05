@@ -6,6 +6,8 @@
 # \date   2014-02-25
 #
 
+REQUIRES = hw
+
 # add include paths
 REP_INC_DIR += src/core/board/nit6_solox
 
