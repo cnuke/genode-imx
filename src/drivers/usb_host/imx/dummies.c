@@ -599,3 +599,12 @@ void skb_init()
 {
 	lx_emul_trace(__func__);
 }
+
+
+#include <linux/sysfs.h>
+
+void sysfs_notify(struct kobject * kobj,const char * dir,const char * attr)
+{
+	lx_emul_trace(__func__);
+}
+
