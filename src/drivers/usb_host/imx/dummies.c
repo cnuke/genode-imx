@@ -608,3 +608,12 @@ void sysfs_notify(struct kobject * kobj,const char * dir,const char * attr)
 	lx_emul_trace(__func__);
 }
 
+
+#include <linux/kobject.h>
+
+int kobject_uevent_env(struct kobject * kobj,enum kobject_action action,char * envp_ext[])
+{
+	lx_emul_trace(__func__);
+	return 0;
+}
+
