@@ -807,3 +807,10 @@ void __crypto_xor(u8 *dst, const u8 *src1, const u8 *src2, unsigned int len)
 	while (len--)
 		*dst++ = *src1++ ^ *src2++;
 }
+
+
+extern void flush_dcache_page(struct page * page);
+void flush_dcache_page(struct page * page)
+{
+	lx_emul_trace(__func__);
+}
