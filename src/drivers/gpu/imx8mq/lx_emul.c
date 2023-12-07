@@ -96,13 +96,17 @@ void *lx_drm_open(void)
 	if (err)
 		goto free_file;
 
+	printk("%s:%d\n", __func__, __LINE__);
 	return lx_drm_prv;
 
 free_file:
+	printk("%s:%d\n", __func__, __LINE__);
 	kfree(lx_drm_prv->file);
 free_inode:
+	printk("%s:%d\n", __func__, __LINE__);
 	kfree(lx_drm_prv->inode);
 free_session:
+	printk("%s:%d\n", __func__, __LINE__);
 	kfree(lx_drm_prv);
 	return NULL;
 }
