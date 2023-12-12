@@ -72,7 +72,19 @@
 		</route>
 	</start>
 
-	<start name="falkon-jemalloc" ram="1500M" priority="-2" pkg="cproc/pkg/falkon-jemalloc/2023-10-23">
+	<start name="gpu_drv" caps="1500" pkg="imx8mq_gpu_drv-mnt_reform2">
+		<route>
+			<service name="Platform"> <parent label="gpu"/> </service>
+		</route>
+	</start>
+
+	<start name="mesa_gpu-etnaviv" caps="1500" pkg="mesa_gpu-etnaviv">
+		<route>
+			<service name="RM"> <parent/> </service>
+		</route>
+	</start>
+
+	<start name="morph_browser" ram="1500M" priority="-2" pkg="cnuke/pkg/morph_browser/2023-12-12-a">
 		<affinity xpos="1" width="2"/>
 		<route>
 			<service name="Nic">       <child name="nic_router"/>     </service>
@@ -86,6 +98,8 @@
 			<service name="Report" label_last="shape">     <child name="wm"/> </service>
 			<service name="Report" label="clipboard">      <child name="wm"/> </service>
 			<service name="ROM"    label="clipboard">      <child name="wm"/> </service>
+			<service name="Gpu"> <child name="gpu_drv"/> </service>
+			<service name="ROM" label="mesa_gpu_drv.lib.so"> <child name="mesa_gpu-etnaviv"/> </service>
 		</route>
 	</start>
 
