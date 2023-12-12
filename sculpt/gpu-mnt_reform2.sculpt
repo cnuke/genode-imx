@@ -4,5 +4,7 @@ drivers: mnt_reform2
 import: pkg/drivers_managed-mnt_reform2
 import: pkg/glmark2-imx8q_evk
 
+build: drivers/gpu/imx8mq
+
 deploy: gpu-imx8q_evk
 ram_fs: depot

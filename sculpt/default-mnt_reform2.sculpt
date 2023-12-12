@@ -6,7 +6,9 @@ import: pkg/drivers_managed-mnt_reform2 pkg/imx8mq_wifi
 # selection of launcher-menu entries
 launcher:
 
-deploy: empty
+build: drivers/gpu/imx8mq
+
+deploy: falkon_web_browser
 presets: empty window_manager falkon_web_browser
 
-depot: genodelabs alex-ab cproc skalk
+depot: genodelabs alex-ab cproc skalk cnuke
