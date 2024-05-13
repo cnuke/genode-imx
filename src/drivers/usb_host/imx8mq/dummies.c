@@ -71,33 +71,9 @@ int __pm_runtime_suspend(struct device * dev,int rpmflags)
 }
 
 
-#include <linux/random.h>
-
-void add_device_randomness(const void * buf,unsigned int size)
-{
-	lx_emul_trace(__func__);
-}
-
-
-#include <linux/random.h>
-
-void add_interrupt_randomness(int irq,int irq_flags)
-{
-	lx_emul_trace(__func__);
-}
-
-
 #include <linux/dma-map-ops.h>
 
 void arch_setup_dma_ops(struct device * dev,u64 dma_base,u64 size,const struct iommu_ops * iommu,bool coherent)
-{
-	lx_emul_trace(__func__);
-}
-
-
-#include <linux/dma-map-ops.h>
-
-void arch_teardown_dma_ops(struct device * dev)
 {
 	lx_emul_trace(__func__);
 }
@@ -155,22 +131,6 @@ void clk_bulk_unprepare(int num_clks,const struct clk_bulk_data * clks)
 }
 
 
-#include <linux/debugfs.h>
-
-void debugfs_create_regset32(const char * name,umode_t mode,struct dentry * parent,struct debugfs_regset32 * regset)
-{
-	lx_emul_trace(__func__);
-}
-
-
-#include <linux/debugfs.h>
-
-void debugfs_remove(struct dentry * dentry)
-{
-	lx_emul_trace(__func__);
-}
-
-
 #include <linux/pm_qos.h>
 
 int dev_pm_qos_expose_flags(struct device * dev,s32 val)
@@ -192,32 +152,6 @@ int dev_pm_qos_add_request(struct device * dev,struct dev_pm_qos_request * req,e
 #include <linux/pm_qos.h>
 
 int dev_pm_qos_remove_request(struct dev_pm_qos_request * req)
-{
-	lx_emul_trace(__func__);
-	return 0;
-}
-
-
-#include <linux/pm_wakeup.h>
-
-int device_init_wakeup(struct device * dev,bool enable)
-{
-	lx_emul_trace(__func__);
-	return 0;
-}
-
-
-#include <linux/pm_wakeup.h>
-
-void device_set_wakeup_capable(struct device * dev,bool capable)
-{
-	lx_emul_trace(__func__);
-}
-
-
-#include <linux/pm_wakeup.h>
-
-int device_set_wakeup_enable(struct device * dev,bool enable)
 {
 	lx_emul_trace(__func__);
 	return 0;
@@ -255,15 +189,6 @@ int devtmpfs_delete_node(struct device * dev)
 {
 	lx_emul_trace(__func__);
 	return 0;
-}
-
-
-#include <linux/dmi.h>
-
-const char * dmi_get_system_info(int field)
-{
-	lx_emul_trace(__func__);
-	return NULL;
 }
 
 
@@ -338,16 +263,6 @@ int of_clk_set_defaults(struct device_node * node,bool clk_supplier)
 
 	lx_emul_trace(__func__);
 	return 0;
-}
-
-
-#include <linux/of_iommu.h>
-
-const struct iommu_ops * of_iommu_configure(struct device * dev,struct device_node * master_np,const u32 * id)
-{
-	static struct iommu_ops ops;
-	lx_emul_trace(__func__);
-	return &ops;
 }
 
 
@@ -546,22 +461,6 @@ void sysfs_remove_link(struct kobject * kobj,const char * name)
 #include <linux/sysfs.h>
 
 void sysfs_unmerge_group(struct kobject * kobj,const struct attribute_group * grp)
-{
-	lx_emul_trace(__func__);
-}
-
-
-#include <linux/nmi.h>
-
-notrace void touch_softlockup_watchdog_sched(void)
-{
-	lx_emul_trace(__func__);
-}
-
-
-#include <linux/wait_bit.h>
-
-void __init wait_bit_init(void)
 {
 	lx_emul_trace(__func__);
 }
