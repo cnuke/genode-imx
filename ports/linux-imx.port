@@ -23,6 +23,8 @@ default: reform-debian-packages.git linux-imx.archive compulab.git
 	cd linux-imx; for p in ../reform/linux/patches/*.patch; do patch -p1 < $$p; done; cd ..
 	cp reform/linux/*.dts linux-imx/arch/arm64/boot/dts/freescale/
 
+PATCHES := src/drivers/usb_host/imx8mq/imx8mq-evk-enable-usb-c-dts.patch
+
 #
 # Unfortunately, we have to check manually whether the target linux archive got already
 # unpacked and eventually have to delete it. Otherwise newly created files by the patches
