@@ -1,0 +1,232 @@
+assert_spec arm_v8a
+
+create_boot_directory
+import_from_depot [depot_user]/src/[base_src] \
+                  [depot_user]/src/expat \
+                  [depot_user]/src/init \
+                  [depot_user]/src/libc \
+                  [depot_user]/src/libdrm \
+                  [depot_user]/src/mesa \
+                  [depot_user]/src/nitpicker \
+                  [depot_user]/src/stdcxx \
+                  [depot_user]/src/vfs \
+                  [depot_user]/src/vfs_gpu \
+                  [depot_user]/src/zlib \
+                  [depot_user]/pkg/imx8mq_gpu_drv-[board] \
+                  [depot_user]/raw/[board]-devices
+
+build {
+	drivers/framebuffer/imx8mq
+	drivers/gpio/imx/spec/arm_v8
+	drivers/i2c/imx8q_evk
+	drivers/platform/imx8mq
+	drivers/pwm/imx8mq
+
+	test/mesa_demo/gears
+}
+
+
+proc fb_drv_dtb { } {
+	return imx8mq_fb_drv-[board].dtb
+}
+
+proc gpu_drv_dtb { } {
+	return imx8mq_gpu_drv-[board].dtb
+}
+
+
+install_config {
+<config>
+	<parent-provides>
+		<service name="ROM"/>
+		<service name="IRQ"/>
+		<service name="IO_MEM"/>
+		<service name="IO_PORT"/>
+		<service name="PD"/>
+		<service name="RM"/>
+		<service name="CPU"/>
+		<service name="LOG"/>
+	</parent-provides>
+	<default-route>
+		<any-service> <parent/> <any-child/> </any-service>
+	</default-route>
+	<default caps="100"/>
+
+	<start name="timer">
+		<resource name="RAM" quantum="1M"/>
+		<provides><service name="Timer"/></provides>
+	</start>
+
+	<start name="platform_drv" caps="150" managing_system="yes">
+		<binary name="imx8mq_platform_drv"/>
+		<resource name="RAM" quantum="2M"/>
+		<provides> <service name="Platform"/> </provides>
+		<config>
+			<policy label="fb_drv -> " info="yes">
+				<device name="dcss"/>
+				<device name="hdmi"/>
+				<device name="mipi_dsi"/>
+				<device name="mipi_dsi_phy"/>
+				<device name="lcd"/>
+				<device name="irqsteer"/>
+				<device name="pclk"/>
+				<device name="esc"/>
+				<device name="dpi"/>
+			</policy>
+
+			<policy label="imx8mq_pwm_drv -> ">
+				<device name="pwm"/>
+			</policy>
+
+			<policy label="gpio_drv -> " info="yes">
+				<device name="gpio1"/>
+				<device name="gpio2"/>
+				<device name="gpio3"/>
+				<device name="gpio4"/>
+				<device name="gpio5"/>
+			</policy>
+
+			<policy label="i2c_drv -> ">
+				<device name="i2c"/>
+			</policy>
+
+			<policy label="imx8mq_gpu_drv -> " info="yes">
+				<device name="gpu"/>
+			</policy>
+		</config>
+		<route> <any-service> <parent/> </any-service> </route>
+	</start>
+
+	<start name="gpio_drv" caps="150">
+		<binary name="imx_gpio_drv"/>
+		<resource name="RAM" quantum="2M"/>
+		<provides><service name="Gpio"/></provides>
+		<route>
+			<service name="RM">       <parent/> </service>
+			<service name="ROM">      <parent/> </service>
+			<service name="PD">       <parent/> </service>
+			<service name="CPU">      <parent/> </service>
+			<service name="LOG">      <parent/> </service>
+			<service name="Platform"> <child name="platform_drv"/> </service>
+		</route>
+		<config>
+			<gpio num="10" mode="O" value="1"/>
+			<gpio num="84" mode="O" value="1"/>
+		</config>
+	</start>
+
+	<start name="i2c_drv" caps="150">
+		<binary name="imx8q_evk_i2c_drv"/>
+		<resource name="RAM" quantum="2M"/>
+		<provides><service name="I2c"/></provides>
+		<route>
+			<service name="RM">       <parent/> </service>
+			<service name="ROM">      <parent/> </service>
+			<service name="PD">       <parent/> </service>
+			<service name="CPU">      <parent/> </service>
+			<service name="LOG">      <parent/> </service>
+			<service name="Platform"> <child name="platform_drv"/> </service>
+			<service name="Timer">    <child name="timer"/>        </service>
+		</route>
+		<config verbose="yes">
+			 <policy label_prefix="fb_drv" bus_address="0x2c"/>
+		</config>
+	</start>
+
+	<start name="imx8mq_pwm_drv" caps="100">
+		<resource name="RAM" quantum="2M"/>
+		<route>
+			<service name="RM">       <parent/> </service>
+			<service name="ROM">      <parent/> </service>
+			<service name="PD">       <parent/> </service>
+			<service name="CPU">      <parent/> </service>
+			<service name="LOG">      <parent/> </service>
+			<service name="Platform"> <child name="platform_drv"/> </service>
+		</route>
+		<config period="248" sample="250" clock_source="ipg_highfreq"/>
+	</start>
+
+	<start name="fb_drv" caps="250">
+		<binary name="imx8mq_fb_drv"/>
+		<resource name="RAM" quantum="40M"/>
+		<route>
+			<service name="ROM" label="dtb"> <parent label="} [fb_drv_dtb] {"/> </service>
+			<service name="RM">       <parent/> </service>
+			<service name="ROM">      <parent/> </service>
+			<service name="PD">       <parent/> </service>
+			<service name="CPU">      <parent/> </service>
+			<service name="LOG">      <parent/> </service>
+			<service name="Timer">    <child name="timer"/>        </service>
+			<service name="Platform"> <child name="platform_drv"/> </service>
+			<service name="Capture">  <child name="nitpicker"/>    </service>
+			<service name="I2c">      <child name="i2c_drv"/>      </service>
+		</route>
+	</start>
+
+	<start name="imx8mq_gpu_drv" caps="500">
+		<resource name="RAM" quantum="128M"/>
+		<provides>
+			<service name="Gpu"/>
+		</provides>
+		<config ld_verbose="yes"/>
+		<route>
+			<service name="ROM" label="dtb">
+				<parent label="} [gpu_drv_dtb] {"/>
+			</service>
+			<service name="Timer"> <child name="timer"/> </service>
+			<service name="Gui"> <child name="nitpicker"/> </service>
+			<service name="Platform"> <child name="platform_drv"/> </service>
+			<any-service> <parent/> </any-service>
+		</route>
+	</start>
+
+	<start name="nitpicker" caps="200">
+		<resource name="RAM" quantum="2M"/>
+		<provides>
+			<service name="Gui"/> <service name="Capture"/> <service name="Event"/>
+		</provides>
+		<config verbose="yes">
+			<capture/> <event/>
+			<domain name="pointer" layer="1" xpos="1100" ypos="0" content="client" label="no" origin="pointer" />
+			<domain name="default" layer="3" content="client" label="no" focus="click" hover="always" />
+			<domain name="glmark2" layer="3" xpos="0" ypos="0" content="client" label="no" focus="click" hover="always" />
+			<domain name="gears"   layer="3" xpos="800" ypos="300" content="client" label="no" focus="click" hover="always" />
+			<policy label_prefix="pointer" domain="pointer"/>
+			<policy label_prefix="glmark2" domain="glmark2"/>
+			<policy label_prefix="gears"   domain="gears"/>
+			<default-policy                domain="default"/>
+		</config>
+		<route><any-service><parent/><any-child/></any-service></route>
+	</start>
+
+	<start name="gears" caps="500">
+		<binary name="gears"/>
+		<resource name="RAM" quantum="160M"/>
+		<config ld_verbose="true">
+			<libc stdout="/dev/log" stderr="/dev/log" rtc="/dev/rtc" />
+			<vfs>
+				<dir name="dev">
+					<log/> <inline name="rtc">2024-05-15 00:00</inline>
+					<gpu/>
+				</dir>
+			</vfs>
+			<env key="GALLIUM_HUD" value="fps,draw-calls"/>
+			<env key="USE_GPU_SESSION" value="yes"/>
+		</config>
+		<route>
+			<service name="Gui"> <child name="nitpicker"/> </service>
+			<service name="ROM" label="mesa_gpu_drv.lib.so">
+				<parent label="mesa_gpu-etnaviv.lib.so"/>
+			</service>
+			<any-service> <parent/> <any-child/> </any-service>
+		</route>
+	</start>
+</config>}
+
+set boot_modules [build_artifacts]
+lappend boot_modules [gpu_drv_dtb]
+lappend boot_modules [fb_drv_dtb]
+
+build_boot_image $boot_modules
+
+run_genode_until forever
