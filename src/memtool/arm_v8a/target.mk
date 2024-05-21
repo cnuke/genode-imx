@@ -1,6 +1,6 @@
 $(call check_tool,aarch64-linux-gnu-gcc)
 
-TARGET   := memtool
+TARGET   := memtool.target
 REQUIRES := arm_64
 
 CUSTOM_TARGET_DEPS := memtool_build.phony
