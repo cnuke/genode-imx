@@ -6,4 +6,5 @@ jitterentropy
 nic_session
 os
 platform_session
+report_session
 uplink_session
