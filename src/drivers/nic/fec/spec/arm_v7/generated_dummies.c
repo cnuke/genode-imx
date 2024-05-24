@@ -548,14 +548,6 @@ bool is_software_node(const struct fwnode_handle * fwnode)
 struct kobject *kernel_kobj;
 
 
-#include <linux/sched.h>
-
-void kick_process(struct task_struct * p)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 #include <linux/kmsg_dump.h>
 
 void kmsg_dump(enum kmsg_dump_reason reason)
@@ -678,22 +670,6 @@ int __init_memblock memblock_reserve(phys_addr_t base,phys_addr_t size)
 #include <linux/string.h>
 
 ssize_t memory_read_from_buffer(void * to,size_t count,loff_t * ppos,const void * from,size_t available)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/preempt.h>
-
-void migrate_disable(void)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/preempt.h>
-
-void migrate_enable(void)
 {
 	lx_emul_trace_and_stop(__func__);
 }
@@ -992,14 +968,6 @@ void sk_free(struct sock * sk)
 
 #include <linux/smp.h>
 
-void smp_call_function_many(const struct cpumask * mask,smp_call_func_t func,void * info,bool wait)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/smp.h>
-
 int smp_call_function_single(int cpu,smp_call_func_t func,void * info,int wait)
 {
 	lx_emul_trace_and_stop(__func__);
@@ -1009,14 +977,6 @@ int smp_call_function_single(int cpu,smp_call_func_t func,void * info,int wait)
 #include <linux/smp.h>
 
 int smp_call_function_single_async(int cpu,struct __call_single_data * csd)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/smp.h>
-
-void smp_send_stop(void)
 {
 	lx_emul_trace_and_stop(__func__);
 }

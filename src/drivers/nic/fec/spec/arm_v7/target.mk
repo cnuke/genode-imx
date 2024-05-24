@@ -11,12 +11,4 @@ DTS_EXTRACT(imx6q_sabrelite) := --select fec
 DTS_PATH(imx7d_sabre)        := arch/arm/boot/dts/imx7d-sdb-reva.dts
 DTS_EXTRACT(imx7d_sabre)     := --select fec1 --select fec2 --select i2c1
 
-CC_OPT_arch/arm/lib/testsetbit   += -include asm/unified.h
-CC_OPT_arch/arm/lib/testclearbit += -include asm/unified.h
-CC_OPT_arch/arm/lib/clearbit     += -include asm/unified.h
-CC_OPT_arch/arm/lib/setbit       += -include asm/unified.h
-CC_OPT_arch/arm/lib/findbit      += -include asm/unified.h
-CC_OPT_arch/arm/lib/csumpartial  += -include asm/unified.h
-CC_OPT_arch/arm/lib/div64        += -include asm/unified.h
-
 include $(REP_DIR)/src/drivers/nic/fec/target.inc

@@ -349,11 +349,14 @@ const struct trace_print_flags vmaflag_names[]  = { {0,NULL}};
 const struct trace_print_flags pageflag_names[]  = { {0,NULL}};
 const struct trace_print_flags gfpflag_names[]  = { {0,NULL}};
 
+#ifdef CONFIG_TREE_SRCU
 
+struct srcu_struct;
 void synchronize_srcu(struct srcu_struct * ssp)
 {
 	lx_emul_trace(__func__);
 }
+#endif
 
 bool arm64_use_ng_mappings = false;
 EXPORT_SYMBOL(arm64_use_ng_mappings);
