@@ -793,23 +793,7 @@ void show_state_filter(unsigned int state_filter)
 
 #include <linux/smp.h>
 
-void smp_call_function_many(const struct cpumask * mask,smp_call_func_t func,void * info,bool wait)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/smp.h>
-
 int smp_call_function_single(int cpu,smp_call_func_t func,void * info,int wait)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/smp.h>
-
-void smp_send_stop(void)
 {
 	lx_emul_trace_and_stop(__func__);
 }
