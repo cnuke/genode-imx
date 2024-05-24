@@ -5,8 +5,12 @@
 # kernel fundamentals
 LX_ENABLE += TTY SERIAL_EARLYCON SERIAL_OF_PLATFORM PRINTK HAS_IOMEM
 LX_ENABLE += NO_HZ_IDLE
-LX_ENABLE += TREE_RCU TREE_SRCU SMP PREEMPT
+LX_ENABLE += TREE_RCU TREE_SRCU PREEMPT
 LX_ENABLE += CMA DMA_CMA ZONE_DMA ZONE_DMA32
+
+# disable SMP because it will generate unsupported instruction on single core
+# Cortex-A8 CPUs
+LX_DISABLE += SMP
 
 # do not generate thumb instructions
 LX_DISABLE += THUMB2_KERNEL ARM_VIRT_EXT DEBUG_PREEMPT
