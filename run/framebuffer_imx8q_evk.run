@@ -1,0 +1,81 @@
+assert_spec arm_v8a
+
+create_boot_directory
+
+import_from_depot [depot_user]/src/[base_src] \
+                  [depot_user]/src/init \
+                  [depot_user]/raw/[board]-devices
+
+build {
+	drivers/framebuffer/imx8mq
+	drivers/gpio/imx/spec/arm_v8
+	drivers/i2c/imx8q_evk
+	drivers/platform/imx8mq
+	test/framebuffer
+}
+
+install_config {
+<config>
+	<parent-provides>
+		<service name="ROM"/>
+		<service name="IRQ"/>
+		<service name="IO_MEM"/>
+		<service name="IO_PORT"/>
+		<service name="PD"/>
+		<service name="RM"/>
+		<service name="CPU"/>
+		<service name="LOG"/>
+	</parent-provides>
+	<default-route>
+		<any-service> <parent/> <any-child/> </any-service>
+	</default-route>
+	<default caps="100"/>
+
+	<start name="timer">
+		<resource name="RAM" quantum="1M"/>
+		<provides><service name="Timer"/></provides>
+	</start>
+
+	<start name="platform_drv" caps="150" managing_system="yes">
+		<binary name="imx8mq_platform_drv"/>
+		<resource name="RAM" quantum="1M"/>
+		<provides> <service name="Platform"/> </provides>
+		<config>
+			<policy label="fb_drv -> " info="yes">
+				<device name="dcss"/>
+				<device name="hdmi"/>
+				<device name="irqsteer"/>
+			</policy>
+		</config>
+		<route> <any-service> <parent/> </any-service> </route>
+	</start>
+
+	<start name="fb_drv" caps="250">
+		<binary name="imx8mq_fb_drv"/>
+		<resource name="RAM" quantum="40M"/>
+		<route>
+			<service name="ROM" label="dtb"> <parent label="} imx8mq_fb_drv-[board].dtb {"/> </service>
+			<service name="RM">       <parent/> </service>
+			<service name="ROM">      <parent/> </service>
+			<service name="PD">       <parent/> </service>
+			<service name="CPU">      <parent/> </service>
+			<service name="LOG">      <parent/> </service>
+			<service name="Timer">    <child name="timer"/>            </service>
+			<service name="Platform"> <child name="platform_drv"/>     </service>
+			<service name="Capture">  <child name="test-framebuffer"/> </service>
+		</route>
+	</start>
+
+	<start name="test-framebuffer">
+		<resource name="RAM" quantum="10M"/>
+		<provides> <service name="Capture"/> </provides>
+		<config/>
+	</start>
+
+</config>}
+
+set boot_modules [build_artifacts]
+append boot_modules " imx8mq_fb_drv-[board].dtb "
+build_boot_image $boot_modules
+
+run_genode_until forever
