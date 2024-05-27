@@ -4,10 +4,10 @@ create_boot_directory
 
 import_from_depot [depot_user]/src/[base_src] \
                   [depot_user]/src/init \
-                  [depot_user]/raw/imx8q_evk-devices
+                  [depot_user]/raw/[board]-devices
 
 build {
-	drivers/framebuffer/imx8mq
+	drivers/framebuffer/legacy/imx8mq
 	drivers/gpio/imx/spec/arm_v8
 	drivers/i2c/imx8q_evk
 	drivers/platform/imx8mq
@@ -51,10 +51,10 @@ install_config {
 	</start>
 
 	<start name="fb_drv" caps="250">
-		<binary name="imx8mq_fb_drv"/>
+		<binary name="legacy_imx8mq_fb_drv"/>
 		<resource name="RAM" quantum="40M"/>
 		<route>
-			<service name="ROM" label="dtb"> <parent label="imx8mq_fb_drv-imx8q_evk.dtb"/> </service>
+			<service name="ROM" label="dtb"> <parent label="} imx8mq_fb_drv-[board].dtb {"/> </service>
 			<service name="RM">       <parent/> </service>
 			<service name="ROM">      <parent/> </service>
 			<service name="PD">       <parent/> </service>
@@ -74,6 +74,8 @@ install_config {
 
 </config>}
 
-build_boot_image [build_artifacts]
+set boot_modules [build_artifacts]
+append boot_modules " imx8mq_fb_drv-[board].dtb "
+build_boot_image $boot_modules
 
 run_genode_until forever
