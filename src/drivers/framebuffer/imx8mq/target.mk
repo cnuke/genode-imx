@@ -12,17 +12,32 @@ SRC_CC   += reset.cc
 
 SRC_C    := dummies.c
 SRC_C    += fb.c
+SRC_C    += gpio-mxc.c
 SRC_C    += i2c_imx.c
 SRC_C    += lx_emul.c
 SRC_C    += lx_emul/shadow/drivers/base/power/runtime.c
 SRC_C    += lx_emul/shadow/drivers/char/random.c
 SRC_C    += lx_user.c
+SRC_C    += pwm-imx27.c
+SRC_C    += regulator-fixed.c
 SRC_C    += reset_core.c
 SRC_C    += $(notdir $(wildcard $(PRG_DIR)/generated_dummies.c))
 
-CC_OPT_i2c_imx  = -DKBUILD_MODFILE='"i2c_imx"'
+CC_OPT_gpio-mxc := -DKBUILD_MODFILE='"gpio-mxc"'
+CC_OPT_gpio-mxc += -DKBUILD_BASENAME='"gpio-mxc"'
+CC_OPT_gpio-mxc += -DKBUILD_MODNAME='"gpio-mxc"'
+
+CC_OPT_i2c_imx := -DKBUILD_MODFILE='"i2c_imx"'
 CC_OPT_i2c_imx += -DKBUILD_BASENAME='"i2c_imx"'
 CC_OPT_i2c_imx += -DKBUILD_MODNAME='"i2c_imx"'
+
+CC_OPT_pwm-imx27 := -DKBUILD_MODFILE='"pwm-imx27"'
+CC_OPT_pwm-imx27 += -DKBUILD_BASENAME='"pwm-imx27"'
+CC_OPT_pwm-imx27 += -DKBUILD_MODNAME='"pwm-imx27"'
+
+CC_OPT_regulator-fixed := -DKBUILD_MODFILE='"regulator-fixed"'
+CC_OPT_regulator-fixed += -DKBUILD_BASENAME='"regulator-fixed"'
+CC_OPT_regulator-fixed += -DKBUILD_MODNAME='"regulator-fixed"'
 
 CC_OPT_drivers/base/regmap/regmap += -I$(LX_SRC_DIR)/drivers/base/regmap
 

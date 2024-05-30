@@ -15,14 +15,6 @@ int ___ratelimit(struct ratelimit_state * rs,const char * func)
 }
 
 
-#include <linux/auxiliary_bus.h>
-
-int __auxiliary_device_add(struct auxiliary_device * auxdev,const char * modname)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 #include <linux/cpumask.h>
 
 struct cpumask __cpu_active_mask;
@@ -82,14 +74,6 @@ void __put_task_struct(struct task_struct * tsk)
 }
 
 
-#include <linux/rtmutex.h>
-
-void __sched __rt_mutex_init(struct rt_mutex * lock,const char * name,struct lock_class_key * key)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 #include <linux/mm.h>
 
 void __show_mem(unsigned int filter,nodemask_t * nodemask,int max_zone_idx)
@@ -117,27 +101,6 @@ void __unregister_chrdev(unsigned int major,unsigned int baseminor,unsigned int 
 #include <linux/vmalloc.h>
 
 void * __vmalloc_node_range(unsigned long size,unsigned long align,unsigned long start,unsigned long end,gfp_t gfp_mask,pgprot_t prot,unsigned long vm_flags,int node,const void * caller)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-extern noinline unsigned int _parse_integer(const char * s,unsigned int base,unsigned long long * p);
-noinline unsigned int _parse_integer(const char * s,unsigned int base,unsigned long long * p)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-extern noinline const char * _parse_integer_fixup_radix(const char * s,unsigned int * base);
-noinline const char * _parse_integer_fixup_radix(const char * s,unsigned int * base)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-extern noinline unsigned int _parse_integer_limit(const char * s,unsigned int base,unsigned long long * p,size_t max_chars);
-noinline unsigned int _parse_integer_limit(const char * s,unsigned int base,unsigned long long * p,size_t max_chars)
 {
 	lx_emul_trace_and_stop(__func__);
 }
@@ -218,22 +181,6 @@ async_cookie_t async_schedule_node(async_func_t func,void * data,int node)
 #include <linux/async.h>
 
 void async_synchronize_full(void)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/auxiliary_bus.h>
-
-int auxiliary_device_init(struct auxiliary_device * auxdev)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/auxiliary_bus.h>
-
-void auxiliary_driver_unregister(struct auxiliary_driver * auxdrv)
 {
 	lx_emul_trace_and_stop(__func__);
 }
@@ -335,14 +282,6 @@ struct file * dentry_open(const struct path * path,int flags,const struct cred *
 }
 
 
-#include <linux/pm_domain.h>
-
-void dev_pm_domain_detach(struct device * dev,bool power_off)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 #include <linux/pm_wakeirq.h>
 
 int dev_pm_set_dedicated_wake_irq(struct device * dev,int irq)
@@ -378,14 +317,6 @@ void device_remove_software_node(struct device * dev)
 #include <linux/gpio/driver.h>
 
 int devm_gpiochip_add_data_with_key(struct device * dev,struct gpio_chip * gc,void * data,struct lock_class_key * lock_key,struct lock_class_key * request_key)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/mux/consumer.h>
-
-struct mux_control * devm_mux_control_get(struct device * dev,const char * mux_name)
 {
 	lx_emul_trace_and_stop(__func__);
 }
@@ -789,38 +720,6 @@ int kobject_synth_uevent(struct kobject * kobj,const char * buf,size_t count)
 }
 
 
-#include <linux/kstrtox.h>
-
-noinline int kstrtobool(const char * s,bool * res)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/kstrtox.h>
-
-noinline int kstrtoint(const char * s,unsigned int base,int * res)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/kstrtox.h>
-
-noinline int kstrtoll(const char * s,unsigned int base,long long * res)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/kstrtox.h>
-
-noinline int kstrtoull(const char * s,unsigned int base,unsigned long long * res)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 #include <linux/llist.h>
 
 bool llist_add_batch(struct llist_node * new_first,struct llist_node * new_last,struct llist_head * head)
@@ -943,14 +842,6 @@ int mux_control_deselect(struct mux_control * mux)
 }
 
 
-#include <linux/mux/consumer.h>
-
-int mux_control_try_select_delay(struct mux_control * mux,unsigned int state,unsigned int delay_us)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 #include <linux/irq.h>
 
 struct irq_chip no_irq_chip;
@@ -967,14 +858,6 @@ loff_t noop_llseek(struct file * file,loff_t offset,int whence)
 #include <linux/irq.h>
 
 void note_interrupt(struct irq_desc * desc,irqreturn_t action_ret)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/pwm.h>
-
-struct pwm_device * of_pwm_single_xlate(struct pwm_chip * pc,const struct of_phandle_args * args)
 {
 	lx_emul_trace_and_stop(__func__);
 }
@@ -1066,22 +949,6 @@ void put_unused_fd(unsigned int fd)
 }
 
 
-#include <linux/pwm.h>
-
-int pwmchip_add(struct pwm_chip * chip)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/pwm.h>
-
-void pwmchip_remove(struct pwm_chip * chip)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 #include <linux/reboot.h>
 
 enum reboot_mode reboot_mode;
@@ -1154,30 +1021,6 @@ int request_firmware_nowait(struct module * module,bool uevent,const char * name
 #include <linux/reset.h>
 
 int reset_control_assert(struct reset_control * rstc)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/rtmutex.h>
-
-void __sched rt_mutex_lock(struct rt_mutex * lock)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/rtmutex.h>
-
-int __sched rt_mutex_trylock(struct rt_mutex * lock)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/rtmutex.h>
-
-void __sched rt_mutex_unlock(struct rt_mutex * lock)
 {
 	lx_emul_trace_and_stop(__func__);
 }

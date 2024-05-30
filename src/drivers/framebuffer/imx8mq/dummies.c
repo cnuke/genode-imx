@@ -245,15 +245,6 @@ struct gpio_desc * __must_check devm_gpiod_get_optional(struct device * dev,cons
 }
 
 
-#include <linux/backlight.h>
-
-struct backlight_device *devm_of_find_backlight(struct device *dev)
-{
-	lx_emul_trace(__func__);
-	return NULL;
-}
-
-
 #include <linux/regulator/consumer.h>
 
 int devm_regulator_bulk_get(struct device * dev,int num_consumers,struct regulator_bulk_data * consumers)
@@ -474,6 +465,14 @@ int regulator_enable(struct regulator * regulator)
 
 #include <linux/regulator/consumer.h>
 
+int regulator_is_enabled(struct regulator * regulator)
+{
+	return 0;
+}
+
+
+#include <linux/regulator/consumer.h>
+
 struct regulator * regulator_get_optional(struct device * dev,const char * id)
 {
 	lx_emul_trace(__func__);
@@ -513,14 +512,18 @@ void simple_release_fs(struct vfsmount ** mount,int * count)
 
 const struct soc_device_attribute * soc_device_match(const struct soc_device_attribute * matches)
 {
-	printk("%s:%d XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX from: %p\n", __func__, __LINE__, __builtin_return_address(0));
-	if (!matches) { return NULL; }
+	if (!matches) { 
+	printk("%s:%d\n", __func__, __LINE__);
+		return NULL; }
 
 	for (; matches->machine && matches->family &&
 	       matches->revision && matches->soc_id; matches++) {
-		if (strcmp(matches->soc_id, "i.MX8MQ") == 0) { return matches; }
+		if (strcmp(matches->soc_id, "i.MX8MQ") == 0) {
+	printk("%s:%d\n", __func__, __LINE__);
+			return matches; }
 	}
 
+	printk("%s:%d\n", __func__, __LINE__);
 	return NULL;
 }
 
@@ -909,6 +912,14 @@ int dev_pm_domain_attach(struct device * dev,bool power_on)
 }
 
 
+#include <linux/pm_domain.h>
+
+void dev_pm_domain_detach(struct device * dev,bool power_off)
+{
+	lx_emul_trace(__func__);
+}
+
+
 #include <linux/sysfs.h>
 
 void sysfs_remove_groups(struct kobject * kobj,const struct attribute_group ** groups)
@@ -980,15 +991,6 @@ void pm_runtime_remove(struct device * dev)
 }
 
 
-#include <linux/auxiliary_bus.h>
-
-int __auxiliary_driver_register(struct auxiliary_driver * auxdrv,struct module * owner,const char * modname)
-{
-	lx_emul_trace(__func__);
-	return 0;
-}
-
-
 #include <linux/rcupdate.h>
 
 void rcu_sched_clock_irq(int user)
@@ -1008,4 +1010,28 @@ long strnlen_user(const char __user * str,long count)
 void add_interrupt_randomness(int irq)
 {
 	lx_emul_trace(__func__);
+}
+
+
+void rt_mutex_setprio(struct task_struct *p, struct task_struct *pi_task)
+{
+	lx_emul_trace(__func__);
+}
+
+
+#include <linux/mux/consumer.h>
+
+struct mux_control * devm_mux_control_get(struct device * dev,const char * mux_name)
+{
+	lx_emul_trace(__func__);
+	return NULL;
+}
+
+
+#include <linux/mux/consumer.h>
+
+int mux_control_try_select_delay(struct mux_control * mux,unsigned int state,unsigned int delay_us)
+{
+	lx_emul_trace(__func__);
+	return 0;
 }

@@ -11,6 +11,7 @@ arch/arm64/lib/strlen.S
 arch/arm64/lib/strncmp.S
 arch/arm64/lib/strnlen.S
 arch/arm64/lib/strrchr.S
+drivers/base/auxiliary.c
 drivers/base/bus.c
 drivers/base/class.c
 drivers/base/component.c
@@ -41,7 +42,6 @@ drivers/gpu/drm/bridge/cadence/cdns-mhdp-cec.c
 drivers/gpu/drm/bridge/cadence/cdns-mhdp-common.c
 drivers/gpu/drm/bridge/cadence/cdns-mhdp-hdmi.c
 drivers/gpu/drm/bridge/cadence/cdns-mhdp8546-core.c
-drivers/gpu/drm/bridge/display-connector.c
 drivers/gpu/drm/bridge/lvds-codec.c
 drivers/gpu/drm/bridge/nwl-dsi.c
 drivers/gpu/drm/bridge/panel.c
@@ -138,8 +138,9 @@ drivers/gpu/drm/imx/dcss/dcss-scaler.c
 drivers/gpu/drm/imx/dcss/dcss-ss.c
 drivers/gpu/drm/mxsfb/mxsfb_drv.c
 drivers/gpu/drm/mxsfb/mxsfb_kms.c
+drivers/gpu/drm/panel/panel-edp.c
 drivers/gpu/drm/panel/panel-lvds.c
-drivers/gpu/drm/panel/panel-simple.c
+drivers/gpu/drm/panel/panel-raydium-rm67191.c
 drivers/i2c/i2c-core-base.c
 drivers/i2c/i2c-core-of.c
 drivers/i2c/i2c-core-smbus.c
@@ -162,7 +163,12 @@ drivers/of/property.c
 drivers/phy/freescale/phy-fsl-imx8-mipi-dphy.c
 drivers/phy/phy-core-mipi-dphy.c
 drivers/phy/phy-core.c
+drivers/pwm/core.c
+drivers/pwm/sysfs.c
+drivers/video/backlight/backlight.c
+drivers/video/backlight/pwm_bl.c
 drivers/video/display_timing.c
+drivers/video/fbdev/core/fb_notify.c
 drivers/video/fbdev/core/fbcmap.c
 drivers/video/hdmi.c
 drivers/video/of_display_timing.c
@@ -179,6 +185,7 @@ kernel/kthread.c
 kernel/locking/mutex.c
 kernel/locking/osq_lock.c
 kernel/locking/rtmutex.c
+kernel/locking/rtmutex_api.c
 kernel/locking/rwsem.c
 kernel/notifier.c
 kernel/panic.c
@@ -224,6 +231,7 @@ lib/irq_regs.c
 lib/kasprintf.c
 lib/klist.c
 lib/kobject.c
+lib/kstrtox.c
 lib/list_sort.c
 lib/radix-tree.c
 lib/rbtree.c
