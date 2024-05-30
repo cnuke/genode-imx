@@ -5,7 +5,7 @@ if {![image_uboot_use_fit]} {
 
 create_boot_directory
 
-build { imx_linux busybox memtool }
+build { imx_linux busybox/arm_v8a memtool/arm_v8a }
 
 # Create expected boot directory, as we cannot use build_boot_image
 exec mkdir -p [run_dir]/boot
@@ -92,7 +92,7 @@ proc uart { } {
 proc boot_script { } {
 	set uart [uart]
 	set fd [open [run_dir]/boot.scr w]
-	puts $fd "setenv bootargs 'console=$uart,115200 root=/dev/ram ip=dhcp rdinit=/linuxrc'
+	puts $fd "setenv bootargs 'debug root=/dev/ram ip=dhcp rdinit=/linuxrc'
 bootm  \${loadaddr}
 echo 'Bad image or kernel.'
 reset"
@@ -125,7 +125,7 @@ proc dtb { } {
 		return [pwd]/imx_linux/arm_v8a/arch/arm64/boot/dts/freescale/imx8mq-evk.dtb
 	}
 	if {[have_board "mnt_reform2"]} {
-		return [pwd]/imx_linux/arm_v8a/arch/arm64/boot/dts/freescale/imx8mq-mnt-reform2-hdmi.dtb
+		return [pwd]/imx_linux/arm_v8a/arch/arm64/boot/dts/freescale/imx8mq-mnt-reform2.dtb
 	}
 	puts "not supported board!"
 	exit 1
@@ -235,6 +235,8 @@ proc run_boot_string { } { return "Booting Linux" }
 
 puts "FIT image can be found under [run_dir]/boot/image.itb"
 puts "load it via u-boot to a loadaddr, and start it via: source \${loadaddr}:bootscript"
+
+exec cp [run_dir]/boot/image.itb /var/tftp
 
 run_genode_until forever
 interact
