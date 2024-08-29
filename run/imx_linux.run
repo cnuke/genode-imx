@@ -5,7 +5,7 @@ if {![image_uboot_use_fit]} {
 
 create_boot_directory
 
-build { imx_linux busybox memtool }
+build { imx_linux busybox/arm_v8a memtool/arm_v8a }
 
 # Create expected boot directory, as we cannot use build_boot_image
 exec mkdir -p [run_dir]/boot
@@ -240,6 +240,8 @@ proc run_boot_string { } { return "Booting Linux" }
 
 puts "FIT image can be found under [run_dir]/boot/image.itb"
 puts "load it via u-boot to a loadaddr, and start it via: source \${loadaddr}:bootscript"
+
+exec cp [run_dir]/boot/image.itb /var/tftp
 
 run_genode_until forever
 interact
