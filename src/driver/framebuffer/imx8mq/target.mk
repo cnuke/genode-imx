@@ -12,6 +12,7 @@ SRC_CC   += reset.cc
 
 SRC_C    := dummies.c
 SRC_C    += fb.c
+SRC_C    += gpcv2.c
 SRC_C    += gpio-mxc.c
 SRC_C    += i2c_imx.c
 SRC_C    += lx_emul.c
@@ -19,6 +20,7 @@ SRC_C    += lx_emul/common_dummies.c
 SRC_C    += lx_emul/shadow/drivers/base/power/runtime.c
 SRC_C    += lx_emul/shadow/drivers/char/random.c
 SRC_C    += lx_user.c
+SRC_C    += pinctrl.c
 SRC_C    += pwm-imx27.c
 SRC_C    += regulator-fixed.c
 SRC_C    += reset_core.c

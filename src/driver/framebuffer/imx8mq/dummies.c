@@ -1024,3 +1024,21 @@ bool video_firmware_drivers_only(void)
 	lx_emul_trace(__func__);
 	return false;
 }
+
+
+#include <linux/regulator/consumer.h>
+
+struct regulator * devm_regulator_get_optional(struct device * dev,const char * id)
+{
+	lx_emul_trace(__func__);
+	return NULL;
+}
+
+
+#include <linux/gpio/consumer.h>
+
+int gpiod_direction_output(struct gpio_desc * desc,int value)
+{
+	lx_emul_trace(__func__);
+	return 0;
+}

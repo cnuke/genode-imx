@@ -338,14 +338,6 @@ int devm_gpiochip_add_data_with_key(struct device * dev,struct gpio_chip * gc,vo
 }
 
 
-#include <linux/regulator/consumer.h>
-
-struct regulator * devm_regulator_get_optional(struct device * dev,const char * id)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
 extern int devtmpfs_delete_node(struct device * dev);
 int devtmpfs_delete_node(struct device * dev)
 {
@@ -563,14 +555,6 @@ bool gfp_pfmemalloc_allowed(gfp_t gfp_mask)
 #include <linux/gpio/driver.h>
 
 void * gpiochip_get_data(struct gpio_chip * gc)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/gpio/consumer.h>
-
-int gpiod_direction_output(struct gpio_desc * desc,int value)
 {
 	lx_emul_trace_and_stop(__func__);
 }
