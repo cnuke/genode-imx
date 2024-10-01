@@ -52,6 +52,13 @@
 		<property name="snps,parkmode-disable-ss-quirk"/>
 	</device>
 
+	<device name="gpio1">
+		<io_mem address="0x30200000" size="0x10000"/>
+		<irq number="96"/>
+		<irq number="97"/>
+		<clock name="gpio1_gate"/>
+	</device>
+
 	<device name="gpio2">
 		<io_mem address="0x30210000" size="0x10000"/>
 		<irq number="98"/>
@@ -66,5 +73,21 @@
 		<clock  name="no_clk" driver_name="ipg"/>
 		<clock  name="nand_usdhc_bus_clk_root" driver_name="ahb"/>
 		<clock  name="usdhc2_gate" driver_name="per"/>
+	</device>
+
+	<device name="pcie" leave_operational="yes">
+		<io_mem       address="0x33800000" size="0x400000"/>
+		<io_mem       address="0x18000000" size="0x8000000"/>
+		<irq          number="158"/>
+		<irq          number="157"/>
+		<irq          number="156"/>
+		<irq          number="155"/>
+		<power-domain name="pcie"/>
+		<clock        name="pcie_phy_clk_root"
+		              parent="system_pll2_div10"/>
+		<clock        name="pcie_aux_clk_root"/>
+		<clock        name="pcie_gate"/>
+		<reset-domain name="pcie_phy"/>
+		<reset-domain name="pcie_core"/>
 	</device>
 </devices>
