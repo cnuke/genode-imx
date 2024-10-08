@@ -82,11 +82,14 @@
 		<irq          number="157"/>
 		<irq          number="156"/>
 		<irq          number="155"/>
+		<power-domain name="hsiomix"/>
 		<power-domain name="pcie"/>
+		<clock        name="hsio_axi_clk_root"/>
 		<clock        name="pcie_phy_clk_root"
 		              parent="system_pll2_div10"/>
 		<clock        name="pcie_aux_clk_root"/>
 		<clock        name="pcie_gate"/>
+		<clock        name="hsio_gate"/>
 		<reset-domain name="pcie_phy"/>
 		<reset-domain name="pcie_core"/>
 	</device>

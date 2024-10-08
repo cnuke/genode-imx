@@ -189,6 +189,9 @@ struct Pcie_controller : Platform::Device::Mmio<0x8bc + 4>
 	{
 		using namespace Pci;
 
+		Genode::error(__func__, ":", __LINE__, " size: ", Genode::Hex(size()));
+		// Genode::error(__func__, ": range(): ", (char const*)r.start);//, ",", (char const*)range().start + range().num_bytes);
+
 		cfg.scan();
 
 		write<Misc_control1::Dbi_ro_wr_enable>(1);
@@ -441,6 +444,7 @@ struct Main
 			{
 				xml.for_each_sub_node("device", [&] (Xml_node xml)
 				{
+					Genode::log("device: '", xml, "'");
 					try {
 						scanner.construct(bus, xml, platform, timer, generator);
 						bus += Pcie_controller::BUS_COUNT_PER_CONTROLLER;

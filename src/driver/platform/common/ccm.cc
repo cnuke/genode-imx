@@ -82,6 +82,7 @@ void Ccm::Root_clock::_enable()
 
 void Ccm::Root_clock::_disable()
 {
+	return;
 	if (_never_disable)
 		return;
 
@@ -127,6 +128,7 @@ void Ccm::Gate::_enable()
 
 void Ccm::Gate::_disable()
 {
+	return;
 	if (_never_disable)
 		return;
 
