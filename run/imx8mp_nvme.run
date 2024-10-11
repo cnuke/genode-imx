@@ -1,0 +1,117 @@
+create_boot_directory
+import_from_depot [depot_user]/src/[base_src] \
+                  [depot_user]/src/init \
+                  [depot_user]/src/report_rom \
+                  [depot_user]/raw/[board]-devices
+
+build {
+	driver/platform/imx8mp
+	driver/pci_host/imx8mq
+	driver/pin/imx
+	driver/nvme
+}
+
+install_config {
+	<config prio_levels="2" verbose="yes">
+		<parent-provides>
+			<service name="LOG"/>
+			<service name="PD"/>
+			<service name="CPU"/>
+			<service name="ROM"/>
+			<service name="IO_MEM"/>
+			<service name="IRQ"/>
+		</parent-provides>
+
+		<default caps="100"/>
+
+		<start name="timer">
+			<resource name="RAM" quantum="1M"/>
+			<route> <any-service> <parent/> </any-service> </route>
+			<provides> <service name="Timer"/> </provides>
+		</start>
+
+		<start name="report_rom">
+			<binary name="report_rom"/>
+			<resource name="RAM" quantum="2M"/>
+			<provides> <service name="Report"/> <service name="ROM"/> </provides>
+			<config verbose="yes">
+				<policy label="platform -> system"          report="dummy-report"/>
+				<policy label="rom_reporter -> pci_devices" report="imx8mq_pci_host -> devices"/>
+			</config>
+			<route>
+				<service name="ROM"> <parent/> </service>
+				<service name="CPU"> <parent/> </service>
+				<service name="PD">  <parent/> </service>
+				<service name="LOG"> <parent/> </service>
+				<service name="Rtc"> <any-child/> </service>
+			</route>
+		</start>
+
+		<start name="platform" caps="150" managing_system="yes">
+			<binary name="imx8mp_platform"/>
+			<resource name="RAM" quantum="2M"/>
+			<provides> <service name="Platform"/> </provides>
+			<config>
+				<policy label="gpio -> ">
+					<device name="gpio1"/>
+				</policy>
+
+				<policy label="imx8mq_pci_host -> " info="yes">
+					<device name="pcie"/>
+				</policy>
+
+				<policy label_prefix="nvme">
+					<pci class="NVME"/>
+				</policy>
+
+			</config>
+			<route>
+				<service name="ROM" label="system"> <child name="report_rom"/> </service>
+				<any-service> <parent/> </any-service>
+			</route>
+		</start>
+
+		<start name="gpio" caps="150">
+			<binary name="imx_pio"/>
+			<resource name="RAM" quantum="1M"/>
+			<provides>
+				<service name="Pin_state"/>
+				<service name="Pin_control"/>
+				<service name="IRQ"/>
+			</provides>
+			<config>
+				<out name="pcie_reset_deassert" bank="0" index="11" default="on"/>
+				<policy label="imx8mq_pci_host -> " pin="pcie_reset_deassert"/>
+			</config>
+			<route>
+				<service name="ROM"> <parent/> </service>
+				<service name="CPU"> <parent/> </service>
+				<service name="PD">  <parent/> </service>
+				<service name="LOG"> <parent/> </service>
+				<service name="Platform"> <child name="platform"/> </service>
+			</route>
+		</start>
+
+		<start name="imx8mq_pci_host">
+			<resource name="RAM" quantum="1M"/>
+			<route>
+				<service name="RM">        <parent/> </service>
+				<service name="ROM">       <parent/> </service>
+				<service name="PD">        <parent/> </service>
+				<service name="CPU">       <parent/> </service>
+				<service name="LOG">       <parent/> </service>
+				<service name="Timer">     <child name="timer"/> </service>
+				<service name="Report">    <child name="report_rom"/> </service>
+				<service name="Platform">  <child name="platform"/>   </service>
+				<service name="Pin_state"> <child name="gpio"/>       </service>
+			</route>
+		</start>
+
+	</config>
+}
+
+build_boot_image [list {*}[build_artifacts]]
+
+run_genode_until forever
+
+# vi: set ft=tcl :
