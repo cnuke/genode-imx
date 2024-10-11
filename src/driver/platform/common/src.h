@@ -74,19 +74,24 @@ struct Src : Genode::Attached_mmio<0x4c>
 	{
 		Src & src;
 
+		bool _global;
+
 		Pcie_phy_switch(Src               & src,
-		                Reset::Name const & name)
-		: Driver::Reset(src.resets, name), src(src) {}
+		                Reset::Name const & name,
+		                bool                global)
+		: Driver::Reset(src.resets, name), src(src), _global(global) {}
 
 		void _deassert() override
 		{
 			src.write<typename REG::Phy_button>(0);
-			src.write<typename REG::Phy_global>(0);
+			if (_global)
+				src.write<typename REG::Phy_global>(0);
 		}
 
 		void _assert() override {
 			src.write<typename REG::Phy_button>(1);
-			src.write<typename REG::Phy_global>(1);
+			if (_global)
+				src.write<typename REG::Phy_global>(1);
 		}
 	};
 
@@ -95,11 +100,16 @@ struct Src : Genode::Attached_mmio<0x4c>
 	Reset_switch<Mipi_phy, Mipi_phy::Esc>  mipi_dsi_esc  { *this, "mipi_dsi_esc",  1, 0 };
 	Reset_switch<Mipi_phy, Mipi_phy::Pclk> mipi_dsi_pclk { *this, "mipi_dsi_pclk", 1, 0 };
 
+	/* IMX8MP */
+	Reset_switch<Pcie_1, Pcie_1::Apps_enable> pcie_core { *this, "pcie_core", 1, 0 };
+	Pcie_phy_switch<Pcie_1>                   pcie_phy  { *this, "pcie_phy", false };
+
+	/* IMX8MQ */
 	Reset_switch<Pcie_1, Pcie_1::Apps_enable> pcie_1_core { *this, "pcie_1_core", 1, 0 };
-	Pcie_phy_switch<Pcie_1>                   pcie_1_phy  { *this, "pcie_1_phy" };
+	Pcie_phy_switch<Pcie_1>                   pcie_1_phy  { *this, "pcie_1_phy", true };
 
 	Reset_switch<Pcie_2, Pcie_2::Apps_enable> pcie_2_core { *this, "pcie_2_core", 1, 0 };
-	Pcie_phy_switch<Pcie_2>                   pcie_2_phy  { *this, "pcie_2_phy" };
+	Pcie_phy_switch<Pcie_2>                   pcie_2_phy  { *this, "pcie_2_phy", true };
 
 	enum {
 		SRC_MMIO_BASE = 0x30390000,

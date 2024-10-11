@@ -147,4 +147,19 @@
 		<clock name="irq_steer_gate"/>
 	</device>
 
+	<device name="pcie" leave_operational="yes">
+		<io_mem       address="0x33800000" size="0x400000"/>
+		<io_mem       address="0x18000000" size="0x8000000"/>
+		<irq          number="158"/>
+		<irq          number="157"/>
+		<irq          number="156"/>
+		<irq          number="155"/>
+		<power-domain name="pcie"/>
+		<clock        name="pcie_phy_clk_root"
+		              parent="system_pll2_div10"/>
+		<clock        name="pcie_aux_clk_root"/>
+		<clock        name="pcie_gate"/>
+		<reset-domain name="pcie_phy"/>
+		<reset-domain name="pcie_core"/>
+	</device>
 </devices>
