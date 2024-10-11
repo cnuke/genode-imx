@@ -1,0 +1,144 @@
+<config>
+
+	<parent-provides>
+		<service name="ROM"/>
+		<service name="IRQ"/>
+		<service name="IO_MEM"/>
+		<service name="PD"/>
+		<service name="RM"/>
+		<service name="CPU"/>
+		<service name="LOG"/>
+		<service name="Timer"/>
+		<service name="Report"/>
+		<service name="Capture"/>
+		<service name="Event"/>
+	</parent-provides>
+
+	<report child_caps="true" child_ram="true" init_caps="true" init_ram="true" delay_ms="5000"/>
+
+	<default-route>
+		<any-service> <parent/> <any-child/> </any-service>
+	</default-route>
+
+	<default caps="100"/>
+
+	<service name="I2c">
+		<default-policy> <child name="i2c"/> </default-policy> </service>
+
+	<service name="Platform">
+		<default-policy> <child name="platform"/> </default-policy> </service>
+
+	<start name="report_rom">
+		<resource name="RAM" quantum="2M"/>
+		<provides> <service name="Report"/> <service name="ROM"/> </provides>
+		<config verbose="no">
+			<policy label="rom_reporter -> pci_devices"   report="imx8mq_pci_host -> devices"/>
+			<policy label="rom_filter -> pci_devices"     report="imx8mq_pci_host -> devices"/>
+		</config>
+	</start>
+
+	<start name="rom_filter" caps="70">
+		<resource name="RAM" quantum="1M"/>
+		<provides> <service name="ROM" /> </provides>
+		<config buffer="32K">
+			<input name="devices"/>
+			<input name="pci_devices"/>
+			<output node="devices">
+				<input name="devices"     skip_toplevel="yes"/>
+				<input name="pci_devices" skip_toplevel="yes"/>
+			</output>
+		</config>
+		<route>
+			<service name="ROM" label="pci_devices"> <child name="report_rom"/> </service>
+			<service name="LOG"> <parent/> </service>
+			<service name="PD">  <parent/> </service>
+			<service name="CPU"> <parent/> </service>
+			<service name="ROM"> <parent/> </service>
+		</route>
+	</start>
+
+	<start name="rom_reporter">
+		<resource name="RAM" quantum="1M"/>
+		<config> <rom label="pci_devices"/> </config>
+		<route>
+			<service name="ROM"    label="pci_devices">   <child name="report_rom"/> </service>
+			<service name="Report" label="pci_devices">   <parent label="pci_devices"/> </service>
+			<service name="LOG"> <parent/> </service>
+			<service name="PD">  <parent/> </service>
+			<service name="CPU"> <parent/> </service>
+			<service name="ROM"> <parent/> </service>
+		</route>
+	</start>
+
+	<start name="platform" caps="300" managing_system="yes">
+		<binary name="imx8mp_platform"/>
+		<resource name="RAM" quantum="3M"/>
+		<provides> <service name="Platform"/> </provides>
+		<config ld_verbose="yes">
+			<report devices="yes"/>
+			<policy label_prefix="runtime -> fb" info="yes">
+				<device name="irqsteer"/>
+				<device name="mipi_dsi"/>
+				<device name="lcdif1"/>
+			</policy>
+
+			<policy label="gpio -> " info="yes">
+				<device name="gpio1"/>
+				<device name="gpio2"/>
+				<device name="gpio3"/>
+				<device name="gpio4"/>
+				<device name="gpio5"/>
+			</policy>
+
+			<policy label_prefix="runtime -> usb" info="yes">
+				<device name="usb3_phy0"/>
+				<device name="usb3_0"/>
+				<device name="usb_dwc3_0"/>
+				<device name="usb3_phy1"/>
+				<device name="usb3_1"/>
+				<device name="usb_dwc3_1"/>
+			</policy>
+
+			<policy label_prefix="runtime -> mmc" info="yes">
+				<device name="usdhc1"/>
+				<device name="usdhc3"/>
+			</policy>
+
+			<policy label="runtime -> nic" info="yes">
+				<device name="fec"/>
+			</policy>
+
+			<policy label_prefix="runtime -> wifi" info="yes">
+				<device name="usdhc2"/>
+			</policy>
+		</config>
+		<route>
+			<service name="ROM" label="system">  <parent label="system"/> </service>
+			<service name="Report" label="devices"> <parent label="devices"/> </service>
+			<service name="ROM" label="devices"> <child name="rom_filter"/> </service>
+			<any-service> <parent/> </any-service>
+		</route>
+	</start>
+
+	<start name="gpio" caps="150">
+		<binary name="imx_pio"/>
+		<resource name="RAM" quantum="2M"/>
+		<provides>
+			<service name="Pin_state"/>
+			<service name="Pin_control"/>
+			<service name="IRQ"/>
+		</provides>
+		<route>
+			<service name="RM">       <parent/> </service>
+			<service name="ROM">      <parent/> </service>
+			<service name="PD">       <parent/> </service>
+			<service name="CPU">      <parent/> </service>
+			<service name="LOG">      <parent/> </service>
+			<service name="Platform"> <child name="platform"/> </service>
+		</route>
+		<config>
+			<out name="panel"     index="7"  bank="0" default="on"/>
+			<out name="wlan_vmmc" index="19" bank="1" default="on"/>
+		</config>
+	</start>
+</config>
