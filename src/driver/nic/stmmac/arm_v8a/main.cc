@@ -52,7 +52,12 @@ struct Stmmac_driver::Main
 	bool _mac_by_rom { _config.xml().attribute_value("mac_address_by_rom",
 	                                                 true) };
 
-	Attached_rom_dataspace _dtb { _env, "dtb" };
+	using Dtb_name = Genode::String<64>;
+
+	Dtb_name _dtb_name {
+		_config.xml().attribute_value("dtb", Dtb_name("dtb")) };
+
+	Attached_rom_dataspace _dtb { _env, _dtb_name.string() };
 
 	Constructible<Attached_rom_dataspace> _mac { };
 	Constructible<Driver>                 _driver { };
