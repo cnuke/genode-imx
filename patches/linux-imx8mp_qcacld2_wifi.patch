@@ -18,3 +18,18 @@ performed.
  /**
   * driver_deferred_probe_trigger() - Kick off re-probing deferred devices
   *
+
+Increase the DMA buffer to 64 KiB because at times someone tries to send
+a bundle that is much larger (so far around 34 KiB at most were observed)
+and this is then dropped by the driver.
+--- a/qca/CORE/SERVICES/HIF/sdio/linux/native_sdio/include/hif_internal.h
++++ b/qca/CORE/SERVICES/HIF/sdio/linux/native_sdio/include/hif_internal.h
+@@ -143,7 +143,7 @@ struct hif_device {
+ #endif
+ };
+ 
+-#define HIF_DMA_BUFFER_SIZE (4 * 1024)
++#define HIF_DMA_BUFFER_SIZE (16 * 4 * 1024)
+ #define CMD53_FIXED_ADDRESS 1
+ #define CMD53_INCR_ADDRESS  2
+ 
