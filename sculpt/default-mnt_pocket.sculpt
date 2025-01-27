@@ -12,3 +12,5 @@ presets: empty nano3d window_manager falkon_web_browser
 depot: genodelabs cnuke alex-ab nfeske cproc chelmuth jschlatow ssumpf skalk
 
 build: driver/platform/imx8mp app/sculpt_manager monitor
+build: server/nitpicker driver/framebuffer/imx8mq server/gui_fader
+build: core lib/ld
