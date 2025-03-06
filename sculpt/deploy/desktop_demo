@@ -1,0 +1,114 @@
+config arch: arm_v8a
+       info: FOSDEM 26
++ common_routes
+  + service ROM | label_last: ld.lib.so | + parent
+  + service CPU                         | + parent
+  + service PD                          | + parent
+  + service LOG                         | + parent
+  + service Timer                       | + parent
+
++ start window_layouter | pkg: window_layouter | priority: -2
+  + route
+    + service ROM         | label: window_list       | + child wm
+    + service ROM         | label: focus_request     | + child wm
+    + service ROM         | label: hover             | + child wm
+    + service ROM         | label: decorator_margins | + child wm
+    + service File_system | label_prefix: recall ->  | + child recall_fs
+    + service Gui                                    | + child wm
+    + service Report                                 | + child wm
+
++ start themed_decorator | pkg: themed_decorator | priority: -2
+  + route
+    + service ROM    | label: window_layout | + child wm
+    + service ROM    | label: pointer       | + child wm
+    + service Report                        | + child wm
+    + service Gui                           | + child wm
+
++ start wm | pkg: wm | priority: -2
+  + route
+    + service Gui    | label: focus          | + parent label: focus
+    + service Report | label_last: shape     | + parent
+    + service Report | label_last: clipboard | + parent
+    + service ROM    | label_last: clipboard | + parent
+    + service Gui                            | + parent
+
++ start fonts_fs | pkg: fonts_fs | priority: -3
+  + route
+    + service ROM | label: config | + parent label: config -> managed/fonts
+
++ start wm_backdrop | pkg: sticks_blue_backdrop | priority: -3
+  + route
+  | + service Gui | + parent label: backdrop
+  + config
+    + libc
+    + vfs
+    | + rom genode_logo.png
+    | + rom grid.png
+    | + rom sticks_blue.png
+    + fill color: #223344
+    + image png: sticks_blue.png | scale: zoom | anchor: bottom_left | alpha: 200
+    + image png: grid.png        | tiled: yes  | alpha: 200
+    + image png: genode_logo.png | anchor: bottom_right | alpha: 150 | xpos: -20 | ypos: -20
+
++ start top_view | pkg: alex-ab/pkg/top_view/2026-01-06-a | priority: -2
+  + route
+    + service File_system | label_prefix: fonts -> | + child fonts_fs
+    + service Gui                                  | + child wm
+    + service TRACE                                | + parent label: global
+
++ start system_info | pkg: jschlatow/pkg/system_info/2025-10-29 | priority: -3
+  + route
+    + service ROM | label: drivers/iommu                     | + child black_hole
+    + service ROM | label: runtime/acpi_support/acpi_battery | + child black_hole
+    + service ROM | label: runtime/nic_router/state          | + child fs_rom
+    + service Gui                                            | + parent label: backdrop
+    + service Rtc                                            | + child system_clock
+
++ start fs_rom | pkg: jschlatow/pkg/fs_rom/2025-10-28 | priority: -3
+  + route
+    + service File_system |  + parent identity: report
+
++ start system_shell | pkg: system_shell | priority: -3
+  + route
+    + service File_system | label_prefix: config -> | + parent identity: config
+    + service File_system | label_prefix: report -> | + parent identity: report
+    + service File_system | label_prefix: target -> | + child default_fs_rw
+    + service File_system | label_prefix: fonts ->  | + child fonts_fs
+    + service ROM         | label: vimrc            | + parent label: config -> vimrc
+    + service ROM         | label: clipboard        | + child wm
+    + service Report      | label: clipboard        | + child wm
+    + service Gui                                   | + child wm
+    + service RM                                    | + parent
+
++ start mesa_gpu-cpu | priority: -3 | pkg: mesa_gpu-cpu
+  + route
+    + service RM | + parent
+
++ start falkon-jemalloc | pkg: cproc/pkg/falkon_qt6-jemalloc/2025-10-27 | priority: -3
+  + affinity xpos: 1 | ypos: 0 | width: 2 | height: 1
+  + route
+    + service File_system | label_prefix: config ->    | + child ram_fs
+    + service File_system | label_prefix: downloads -> | + child ram_fs
+    + service ROM         | label: clipboard           | + child wm
+    + service ROM         | label: mesa_gpu.lib.so     | + child mesa_gpu-cpu
+    + service Report      | label: clipboard           | + child wm
+    + service Report      | label: falkon -> shape     | + child wm
+    + service Capture                                  | + child black_hole
+    + service Gui                                      | + child wm
+    + service Nic                                      | + child nic_router
+    + service Play                                     | + child mixer
+    + service Record                                   | + child black_hole
+    + service RM                                       | + parent
+    + service Rtc                                      | + child system_clock
+
++ start yquake2 | pkg: cnuke/pkg/yquake2/8.00-25.10 | priority: -2
+  + affinity xpos: 3 | ypos: 0 | width: 1 | height: 1
+  + route
+    + service Gui  | + child wm
+    + service Play | + child mixer
+
++ start recall_fs
++ start black_hole
++ start mixer
++ start system_clock
+-

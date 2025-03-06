@@ -11,4 +11,8 @@ presets: empty nano3d window_manager falkon_web_browser
 
 depot: genodelabs cnuke alex-ab nfeske cproc chelmuth jschlatow ssumpf skalk
 
+# FOSDEM26
+presets: desktop_demo screensaver
+
 build: driver/platform/imx8mp app/sculpt_manager monitor
+build: core

@@ -1,0 +1,20 @@
+config arch: arm_v8a
+       info: FOSDEM 26
+
++ common_routes
+  + service ROM | label_last: init      | + parent
+  + service ROM | label_last: ld.lib.so | + parent
+  + service CPU                         | + parent
+  + service LOG                         | + parent
+  + service PD                          | + parent
+  + service Timer                       | + parent
+
++ start black_hole | pkg: cnuke/pkg/black_hole/2025-11-20
+
++ start screensaver | pkg: cnuke/pkg/screensaver/2026-01-07 | priority: -2
+  + affinity | xpos: 0 | width: 4
+  + route
+    + service Gui  | + parent label: backdrop
+    + service Play | + child black_hole
+    + any-service  | + parent | + any-child
+-
