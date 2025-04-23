@@ -8,7 +8,7 @@ import_from_depot [depot_user]/src/[base_src] \
                   [depot_user]/src/report_rom \
                   [depot_user]/raw/mnt_reform2-devices
 
-build { app/block_tester }
+build { app/block_tester server/part_block driver/sd_card/imx8mq }
 
 install_config {
 <config>
@@ -21,7 +21,7 @@ install_config {
 		<service name="CPU"/>
 		<service name="LOG"/>
 	</parent-provides>
-	<default caps="100" ram="1M"/>
+	<default caps="100"/>
 
 	<start name="imx8mq_platform" ram="2M" managing_system="yes">
 		<provides><service name="Platform"/></provides>
@@ -36,7 +36,7 @@ install_config {
 		</route>
 	</start>
 
-	<start name="timer">
+	<start name="timer" ram="1M">
 		<provides><service name="Timer"/></provides>
 		<route> <any-service> <parent/> </any-service> </route>
 	</start>
@@ -67,20 +67,75 @@ install_config {
 		</route>
 	</start>
 
-	<start name="block_tester" ram="64M">
+	<start name="part_block">
+		<binary name="part_block"/>
+		<resource name="RAM" quantum="10M"/>
+		<provides><service name="Block"/></provides>
+		<config>
+			<report partitions="yes"/>
+			<policy label_prefix="block_tester-1" partition="1" writeable="no"/>
+			<policy label_prefix="block_tester-2" partition="2" writeable="no"/>
+			<policy label_prefix="block_tester-3" partition="3" writeable="no"/>
+			<policy label_prefix="block_tester-4" partition="4" writeable="no"/>
+		</config>
+		<route>
+			<any-service><child name="sd_card"/> <parent/><any-child/></any-service>
+		</route>
+	</start>
+
+	<start name="block_tester-1" caps="200">
+		<binary name="block_tester"/>
+		<resource name="RAM" quantum="64M"/>
 		<config verbose="no" report="no" log="yes" stop_on_error="no">
 			<tests>
-				<sequential length="256M" size="1M" io_buffer="8M" batch="4"/>
-				<sequential start="2097152" write="yes" length="256M" size="1M" io_buffer="8M" batch="4"/>
+				<sequential length="1G" size="4K" batch="128"/>
 			</tests>
 		</config>
 		<route>
-			<service name="ROM"> <parent/> </service>
-			<service name="PD">  <parent/> </service>
-			<service name="RM">  <parent/> </service>
-			<service name="CPU"> <parent/> </service>
-			<service name="LOG"> <parent/> </service>
-			<any-service> <any-child/> </any-service>
+			<service name="Block"><child name="part_block"/></service>
+			<any-service> <parent/> <any-child /> </any-service>
+		</route>
+	</start>
+
+	<start name="block_tester-2" caps="200">
+		<binary name="block_tester"/>
+		<resource name="RAM" quantum="64M"/>
+		<config verbose="no" report="no" log="yes" stop_on_error="no">
+			<tests>
+				<sequential length="1G" size="4K" batch="128"/>
+			</tests>
+		</config>
+		<route>
+			<service name="Block"><child name="part_block"/></service>
+			<any-service> <parent/> <any-child /> </any-service>
+		</route>
+	</start>
+
+	<start name="block_tester-3" caps="200">
+		<binary name="block_tester"/>
+		<resource name="RAM" quantum="64M"/>
+		<config verbose="no" report="no" log="yes" stop_on_error="no">
+			<tests>
+				<sequential length="1G" size="4K" batch="128"/>
+			</tests>
+		</config>
+		<route>
+			<service name="Block"><child name="part_block"/></service>
+			<any-service> <parent/> <any-child /> </any-service>
+		</route>
+	</start>
+
+	<start name="block_tester-4" caps="200">
+		<binary name="block_tester"/>
+		<resource name="RAM" quantum="64M"/>
+		<config verbose="no" report="no" log="yes" stop_on_error="no">
+			<tests>
+				<sequential length="1G" size="4K" batch="128"/>
+			</tests>
+		</config>
+		<route>
+			<service name="Block"><child name="part_block"/></service>
+			<any-service> <parent/> <any-child /> </any-service>
 		</route>
 	</start>
 </config> }
