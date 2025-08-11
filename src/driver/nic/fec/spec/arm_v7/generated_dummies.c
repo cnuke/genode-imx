@@ -1,7 +1,7 @@
 /*
  * \brief  Dummy definitions of Linux Kernel functions
  * \author Automatically generated file - do no edit
- * \date   2024-09-10
+ * \date   2025-08-11
  */
 
 #include <lx_emul.h>
@@ -531,6 +531,21 @@ struct user_namespace init_user_ns;
 bool initcall_debug;
 
 
+#include <linux/initrd.h>
+
+int initrd_below_start_ok;
+
+
+#include <linux/initrd.h>
+
+unsigned long initrd_start, initrd_end;
+
+
+#include <linux/initrd.h>
+
+unsigned long initrd_start, initrd_end;
+
+
 #include <linux/ioport.h>
 
 int insert_resource(struct resource * parent,struct resource * new)
@@ -805,6 +820,16 @@ const struct kernel_param_ops param_ops_byte;
 #include <linux/phylib_stubs.h>
 
 const struct phylib_stubs *phylib_stubs;
+
+
+#include <linux/initrd.h>
+
+unsigned long phys_initrd_size;
+
+
+#include <linux/initrd.h>
+
+phys_addr_t phys_initrd_start;
 
 
 #include <linux/sysctl.h>
