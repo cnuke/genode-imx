@@ -103,3 +103,14 @@ bool is_swiotlb_allocated(void)
 	return false;
 }
 #endif
+
+
+#include <linux/initrd.h>
+
+int initrd_below_start_ok;
+
+unsigned long initrd_start, initrd_end;
+
+unsigned long phys_initrd_size;
+
+phys_addr_t phys_initrd_start;
