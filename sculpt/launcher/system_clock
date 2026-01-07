@@ -1,4 +1,4 @@
-<launcher pkg="sntp_dummy_rtc" priority="-1">
+<launcher pkg="cnuke/pkg/chrony_system_rtc/2026-01-07" priority="-2">
 	<route>
 		<service name="Nic"> <child name="nic_router"/> </service>
 	</route>
