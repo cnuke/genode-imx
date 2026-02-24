@@ -1,0 +1,137 @@
+assert {[have_board imx8mp_iot_gate]}
+
+if {[have_cmd_switch --autopilot]} {
+	assert {[have_include power_on/qemu] && [have_board pc]} \
+		"Autopilot mode is not supported on this platform."
+}
+
+create_boot_directory
+import_from_depot [depot_user]/src/[base_src] \
+                  [depot_user]/src/black_hole \
+                  [depot_user]/src/nic_router \
+                  [depot_user]/src/init \
+                  [depot_user]/src/report_rom \
+                  [depot_user]/src/terminal_crosslink \
+                  [depot_user]/src/usb_net \
+                  [depot_user]/raw/imx8mp_iot_gate-devices \
+
+build {
+	driver/usb_host/imx8m
+	driver/usb_net
+	driver/uart/imx
+	driver/platform/imx8mp }
+
+install_config {
+config | verbose: yes
++ parent-provides
+  + service ROM
+  + service IRQ
+  + service IO_MEM
+  + service IO_PORT
+  + service PD
+  + service RM
+  + service CPU
+  + service LOG
++ default-route
+  + any-service
+    + parent
+    + any-child
++ default | caps: 100 | ram: 1M
+
++ start timer
+  + provides
+    + service Timer
+
++ start nic_router | caps: 200 | ram: 16M
+  + provides
+  | + service Nic
+  | + service Uplink
+  + config | verbose_domain_state: yes
+    + policy | label_prefix: usb_net | domain: uplink
+    + domain uplink | use_arp: no
+
++ start terminal_crosslink
+  + provides
+  | + service Terminal
+  + config | buffer: 32K
+
++ start report_rom | caps: 120 | ram: 2M
+  + provides
+  | + service Report
+  | + service ROM
+  + config | verbose: no
+  | + default-policy | report: usb -> usb -> devices
+  + route
+    + any-service
+      + parent
+
++ start black_hole | ram: 2M
+  + provides
+  | + service Terminal
+  | + service ROM
+  + config
+  | + terminal
+  | + rom
+  + route
+    + service Timer | + child timer
+    + any-service   | + parent
+
++ start platform | caps: 300 | ram: 2M | managing_system: yes
+  + binary imx8mp_platform
+  + provides
+  | + service Platform
+  + config
+  | + policy | label: usb -> | info: yes
+  |   + device usb3_phy0
+  |   + device usb3_0
+  |   + device usb_dwc3_0
+  |   + device usb3_phy1
+  |   + device usb3_1
+  |   + device usb_dwc3_1
+  | + policy | label: uart_log -> |
+  |   + device uart2
+  + route
+    + service ROM | label: system | + child black_hole
+    + any-service                 | + parent
+
++ start uart_log | ram: 2M
+  + binary imx_uart
+  + config | carriage_return: true
+  + route
+    + service Terminal | + child terminal_crosslink
+    + service Platform | + child platform
+    + any-service      | + parent
+
++ start usb | caps: 200 | ram: 16M
+  + binary imx8m_usb_host
+  + provides
+  | + service Usb
+  + config
+    + policy | label_prefix: usb_net
+       + device | vendor_id: 0x2c7c | product_id: 0x125  | . Quectel EG-25g
+       + device | vendor_id: 0x12d1 | product_id: 0x15c1 | . Huawei ME906e
+  + route
+    + service ROM | label: dtb | + parent | label: imx8m_usb_host-imx8mp_iot_gate.dtb
+    + service Platform         | + child platform
+    + service Timer            | + child timer
+    + any-service              | + parent
+
++ start usb_net | ram: 16M | caps: 200
+  + provides
+  | + service Terminal
+   config 
+  | + device | vendor_id: 0x12d1 | product_id: 0x15c1 | configuration: 3
+  | . MIBM config profile is 3 for Huawei ME906e, 0 lets Linux driver choose config
+  + route
+    + service Timer                     | + child timer
+    + service Usb                       | + child usb
+    + service Terminal | label: ttyUSB3 | + child terminal_crosslink
+    + service Terminal                  | + child black_hole
+    + service Uplink                    | + child nic_router
+    + any-service                       | + parent
+-
+}
+
+build_boot_image [build_artifacts]
+
+run_genode_until forever
