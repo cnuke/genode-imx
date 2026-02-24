@@ -125,4 +125,8 @@ devices
   + irq    | number: 64
   + clock ecspi2_clk_root | parent: system_pll1_clk | rate: 80000000
   + clock ecspi2_gate
+
++ device uart2 | type: fsl,imx6q-uart
+  + io_mem | address: 0x30890000 | size: 0x1000
+  + irq    | number: 59
 -

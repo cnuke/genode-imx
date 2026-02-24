@@ -27,7 +27,7 @@ namespace Hw::Imx8mp_iot_gate_board {
 		RAM_1_BASE = 0x58000000,
 		RAM_1_SIZE = 0x68000000,
 
-		UART_BASE  = 0x30890000,       /* UART3 */
+		UART_BASE  = 0x30890000,       /* UART2 */
 		UART_SIZE  = 0x1000,
 		UART_CLOCK = 250000000,
 	};
