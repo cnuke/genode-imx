@@ -1,156 +1,128 @@
-<devices>
-	<device name="fec" type="fsl,imx8mp-fec">
-		<io_mem address="0x30be0000" size="0x10000"/>
-		<irq    number="150"/>
-		<irq    number="151"/>
-		<irq    number="152"/>
-		<irq    number="153"/>
-		<clock  name="enet_axi_clk_root"
-		        parent="system_pll1_div3"/>
-		<clock  name="enet_timer_clk_root"
-		        parent="system_pll2_div10"
-		        rate="100000000"
-		        driver_name="ptp"/>
-		<clock  name="enet_ref_clk_root"
-		        parent="system_pll2_div8"
-		        rate="125000000"
-		        driver_name="enet_clk_ref"/>
-		<clock  name="enet_phy_ref_clk_root"
-		        parent="system_pll2_div20"
-		        driver_name="enet_out"/>
-		<clock  name="enet1_gate" driver_name="ipg"/>
-		<clock  name="sim_enet_gate" driver_name="ahb"/>
-	</device>
+devices
 
-	<device name="eqos" type="nxp,imx8mp-dwmac-eqos">
-		<io_mem address="0x30bf0000" size="0x10000"/>
-		<irq    number="167"/>
-		<irq    number="166"/>
-		<clock  name="enet_axi_clk_root"
-		        parent="system_pll1_div3"/>
-		<clock  name="enet_qos_timer_clk_root"
-		        parent="system_pll2_div10"
-		        rate="100000000"
-		        driver_name="ptp_ref"/>
-		<clock  name="enet_qos_clk_root"
-		        parent="system_pll2_div8"
-		        rate="125000000"
-		        driver_name="tx"/>
-		<clock  name="enet_qos_gate" driver_name="stmmaceth"/>
-		<clock  name="qos_enet_gate" driver_name="pclk"/>
-		<clock  name="sim_enet_gate"/>
-	</device>
++ device fec | type: fsl,imx8mp-fec
+  + io_mem | address: 0x30be0000 | size: 0x10000
+  + irq    | number: 150
+  + irq    | number: 151
+  + irq    | number: 152
+  + irq    | number: 153
+  + clock enet_axi_clk_root     | parent: system_pll1_div3
+  + clock enet_timer_clk_root   | parent: system_pll2_div10 | rate: 100000000
+                                | driver_name: ptp
+  + clock enet_ref_clk_root     | parent: system_pll2_div8 | rate: 125000000
+                                | driver_name: enet_clk_ref
+  + clock enet_phy_ref_clk_root | parent: system_pll2_div20
+                                | driver_name: enet_out
+  + clock enet1_gate            | driver_name: ipg
+  + clock sim_enet_gate         | driver_name: ahb
 
-	<device name="usb3_phy0" type="fsl,imx8mp-usb-phy">
-		<io_mem address="0x381f0040" size="0x40"/>
-		<power-domain name="usb1_phy"/>
-		<clock name="usb_phy_gate" driver_name="phy"/>
-		<clock name="usb_phy_clk_root" parent="24m_ref_clk"/>
-		<property name="fsl,phy-tx-preemp-amp-tune" value="3"/>
-	</device>
++ device eqos | type: nxp,imx8mp-dwmac-eqos
+  + io_mem | address: 0x30bf0000 | size: 0x10000
+  + irq    | number: 167
+  + irq    | number: 166
+  + clock enet_axi_clk_root       | parent: system_pll1_div3
+  + clock enet_qos_timer_clk_root | parent: system_pll2_div10 | rate: 100000000
+                                  | driver_name: ptp_ref
+  + clock enet_qos_clk_root       | parent: system_pll2_div8 | rate: 125000000
+                                  | driver_name: tx
+  + clock enet_qos_gate           | driver_name: stmmaceth
+  + clock qos_enet_gate           | driver_name: pclk
+  + clock sim_enet_gate
 
-	<device name="usb3_0" type="fsl,imx8mp-dwc3">
-		<io_mem address="0x32f10100" size="0x8"/>
-		<io_mem address="0x381f0000" size="0x20"/>
-		<irq number="180"/>
-		<clock name="hsio_gate" driver_name="hsio"/>
-		<clock name="32k_ref_clk" driver_name="suspend"/>
-	</device>
++ device usb3_phy0 | type: fsl,imx8mp-usb-phy
+  + io_mem | address: 0x381f0040 | size: 0x40
+  + power-domain usb1_phy
+  + clock usb_phy_gate     | driver_name: phy
+  + clock usb_phy_clk_root | parent: 24m_ref_clk
+  + property fsl,phy-tx-preemp-amp-tune | value: 3
 
-	<device name="usb_dwc3_0" type="snps,dwc3">
-		<io_mem address="0x38100000" size="0x10000"/>
-		<irq number="72"/>
-		<clock name="usb_gate"          driver_name="bus_early"/>
-		<clock name="usb_core_clk_root" driver_name="ref"/>
-		<clock name="usb_gate"          driver_name="suspend"/>
-		<property name="snps,gfladj-refclk-lpm-sel-quirk"/>
-		<property name="snps,parkmode-disable-ss-quirk"/>
-	</device>
++ device usb3_0 | type: fsl,imx8mp-dwc3
+  + io_mem | address: 0x32f10100 | size: 0x8
+  + io_mem | address: 0x381f0000 | size: 0x20
+  + irq    | number: 180
+  + clock hsio_gate   | driver_name: hsio
+  + clock 32k_ref_clk | driver_name: suspend
 
-	<device name="usb3_phy1" type="fsl,imx8mp-usb-phy">
-		<io_mem address="0x382f0040" size="0x40"/>
-		<power-domain name="usb2_phy"/>
-		<clock name="usb_phy_gate" driver_name="phy"/>
-		<clock name="usb_phy_clk_root" parent="24m_ref_clk"/>
-		<property name="fsl,phy-tx-preemp-amp-tune" value="3"/>
-		<property name="fsl,phy-tx-vref-tune" value="0xb"/>
-	</device>
++ device usb_dwc3_0 | type: snps,dwc3
+  + io_mem | address: 0x38100000 | size: 0x10000
+  + irq    | number: 72
+  + clock usb_gate          | driver_name: bus_early
+  + clock usb_core_clk_root | driver_name: ref
+  + clock usb_gate          | driver_name: suspend
+  + property snps,gfladj-refclk-lpm-sel-quirk
+  + property snps,parkmode-disable-ss-quirk
 
-	<device name="usb3_1" type="fsl,imx8mp-dwc3">
-		<io_mem       address="0x32f10108" size="0x8"/>
-		<io_mem       address="0x382f0000" size="0x20"/>
-		<irq          number="181"/>
-		<clock name="hsio_gate" driver_name="hsio"/>
-		<clock name="usb_gate" driver_name="suspend"/>
-	</device>
++ device usb3_phy1 | type: fsl,imx8mp-usb-phy
+  + io_mem | address: 0x382f0040 | size: 0x40
+  + power-domain usb2_phy
+  + clock usb_phy_gate     | driver_name: phy
+  + clock usb_phy_clk_root | parent: 24m_ref_clk
+  + property fsl,phy-tx-preemp-amp-tune | value: 3
+  + property fsl,phy-tx-vref-tune       | value: 0xb
 
-	<device name="usb_dwc3_1" type="snps,dwc3">
-		<io_mem       address="0x38200000" size="0x10000"/>
-		<irq          number="73"/>
-		<clock name="usb_gate"          driver_name="bus_early"/>
-		<clock name="usb_core_clk_root" driver_name="ref"/>
-		<clock name="usb_gate"          driver_name="suspend"/>
-		<property name="snps,gfladj-refclk-lpm-sel-quirk"/>
-		<property name="snps,parkmode-disable-ss-quirk"/>
-	</device>
++ device usb3_1 | type: fsl,imx8mp-dwc3
+  + io_mem | address: 0x32f10108 | size: 0x8
+  + io_mem | address: 0x382f0000 | size: 0x20
+  + irq    | number: 181
+  + clock hsio_gate | driver_name: hsio
+  + clock usb_gate  | driver_name: suspend
 
-	<device name="i2c2">
-		<io_mem address="0x30a30000" size="0x10000"/>
-		<irq number="68"/>
-		<clock name="i2c2_clk_root"/>
-		<clock name="i2c2_gate"/>
-	</device>
++ device usb_dwc3_1 | type: snps,dwc3
+  + io_mem | address: 0x38200000 | size: 0x10000
+  + irq    | number: 73
+  + clock usb_gate          | driver_name: bus_early
+  + clock usb_core_clk_root | driver_name: ref
+  + clock usb_gate          | driver_name: suspend
+  + property snps,gfladj-refclk-lpm-sel-quirk
+  + property snps,parkmode-disable-ss-quirk
 
-	<device name="gpio1">
-		<io_mem address="0x30200000" size="0x10000"/>
-		<irq number="96"/>
-		<irq number="97"/>
-		<clock name="gpio1_gate"/>
-	</device>
++ device i2c2
+  + io_mem | address: 0x30a30000 | size: 0x10000
+  + irq    | number: 68
+  + clock i2c2_clk_root
+  + clock i2c2_gate
 
-	<device name="gpio2">
-		<io_mem address="0x30210000" size="0x10000"/>
-		<irq number="98"/>
-		<irq number="99"/>
-		<clock name="gpio2_gate"/>
-	</device>
++ device gpio1
+  + io_mem | address: 0x30200000 | size: 0x10000
+  + irq    | number: 96
+  + irq    | number: 97
+  + clock gpio1_gate
 
-	<device name="gpio3">
-		<io_mem address="0x30220000" size="0x10000"/>
-		<irq number="100"/>
-		<irq number="101"/>
-		<clock name="gpio3_gate"/>
-	</device>
++ device gpio2
+  + io_mem | address: 0x30210000 | size: 0x10000
+  + irq    | number: 98
+  + irq    | number: 99
+  + clock gpio2_gate
 
-	<device name="gpio4">
-		<io_mem address="0x30230000" size="0x10000"/>
-		<irq number="102"/>
-		<irq number="103"/>
-		<clock name="gpio4_gate"/>
-	</device>
++ device gpio3
+  + io_mem | address: 0x30220000 | size: 0x10000
+  + irq    | number: 100
+  + irq    | number: 101
+  + clock gpio3_gate
 
-	<device name="gpio5">
-		<io_mem address="0x30240000" size="0x10000"/>
-		<irq number="104"/>
-		<irq number="105"/>
-		<clock name="gpio5_gate"/>
-	</device>
++ device gpio4
+  + io_mem | address: 0x30230000 | size: 0x10000
+  + irq    | number: 102
+  + irq    | number: 103
+  + clock gpio4_gate
 
-	<device name="usdhc" type="fsl,imx8mp-usdhc">
-		<io_mem address="0x30b60000" size="0x10000"/>
-		<irq    number="56"/>
-		<clock  name="usdhc3_clk_root" rate="400000000"/>
-		<clock  name="no_clk" driver_name="ipg"/>
-		<clock  name="nand_usdhc_bus_clk_root" driver_name="ahb"/>
-		<clock  name="usdhc3_gate" driver_name="per"/>
-	</device>
++ device gpio5
+  + io_mem | address: 0x30240000 | size: 0x10000
+  + irq    | number: 104
+  + irq    | number: 105
+  + clock gpio5_gate
 
-	<device name="ecspi2">
-		<io_mem address="0x30830000" size="0x10000"/>
-		<irq    number="64"/>
-		<clock  name="ecspi2_clk_root"
-		        parent="system_pll1_clk"
-		        rate="80000000"/>
-		<clock  name="ecspi2_gate"/>
-	</device>
-</devices>
++ device usdhc | type: fsl,imx8mp-usdhc
+  + io_mem | address: 0x30b60000 | size: 0x10000
+  + irq    | number: 56
+  + clock usdhc3_clk_root         | rate: 400000000
+  + clock no_clk                  | driver_name: ipg
+  + clock nand_usdhc_bus_clk_root | driver_name: ahb
+  + clock usdhc3_gate             | driver_name: per
+
++ device ecspi2
+  + io_mem | address: 0x30830000 | size: 0x10000
+  + irq    | number: 64
+  + clock ecspi2_clk_root | parent: system_pll1_clk | rate: 80000000
+  + clock ecspi2_gate
+-

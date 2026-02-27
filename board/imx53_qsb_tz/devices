@@ -1,18 +1,16 @@
-<devices>
-	<device name="ipu" type="fsl,imx53-ipu">
-		<io_mem address="0x1e000000" size="0x2000000"/>
-		<clock        name="ipu"/>
-		<reset-domain name="ipu"/>
-	</device>
+devices
 
-	<device name="mmc0" type="fsl,imx53-esdhc">
-		<io_mem address="0x50004000" size="0x4000"/>
-		<irq    number="1"/>
-	</device>
++ device ipu | type: fsl,imx53-ipu
+  + io_mem | address: 0x1e000000 | size: 0x2000000
+  + clock ipu
+  + reset-domain ipu
 
-	<device name="fec" type="fsl,imx25-fec">
-		<io_mem   address="0x63fec000" size="0x4000"/>
-		<irq      number="87"/>
-		<property name="mii" value="rmii"/>
-	</device>
-</devices>
++ device mmc0 | type: fsl,imx53-esdhc
+  + io_mem | address: 0x50004000 | size: 0x4000
+  + irq    | number: 1
+
++ device fec | type: fsl,imx25-fec
+  + io_mem | address: 0x63fec000 | size: 0x4000
+  + irq    | number: 87
+  + property mii | value: rmii
+-

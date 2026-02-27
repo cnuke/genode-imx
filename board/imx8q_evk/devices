@@ -1,156 +1,100 @@
-<devices>
-	<device name="i2c2">
-		<io_mem address="0x30a30000" size="0x10000"/>
-		<irq number="68"/>
-		<clock  name="i2c2_clk_root"
-		        driver_name="i2c2_root_clk" parent="system_pll3_clk"/>
-		<clock  name="i2c2_gate"/>
-	</device>
+devices
 
-	<device name="dcss" type="nxp,imx8mq-dcss">
-		<io_mem address="0x32e00000" size="0x2d000"/>
-		<io_mem address="0x32e2f000" size="0x1000"/>
-		<clock  name="display_apb_clk_root"
-		        driver_name="apb"/>
-		<clock  name="display_axi_clk_root"
-		        parent="system_pll1_clk"
-		        rate="800000000"
-		        driver_name="axi"/>
-		<clock  name="display_rtrm_clk_root"
-		        parent="system_pll1_clk"
-		        rate="400000000"
-		        driver_name="rtrm"/>
-		<clock  name="video_pll2_clk"
-		        parent="hdmi_phy_27m_clk"
-		        rate="148500000"
-		        driver_name="pix"/>
-		<clock  name="display_dtrc_clk_root"
-		        driver_name="dtrc"/>
-		<clock  name="video_pll2_clk"
-		        driver_name="pll_src"/>
-		<clock  name="hdmi_phy_27m_clk"
-		        driver_name="pll_phy_ref"/>
-		<clock  name="video_pll1_clk"
-		        parent="25m_ref_clk"
-		        rate="25000000"/>
-		<clock  name="dc_pixel_clk_root"
-		        parent="video_pll1_clk"
-		        rate="594000000"/>
-	</device>
++ device i2c2
+  + io_mem | address: 0x30a30000 | size: 0x10000
+  + irq    | number: 68
+  + clock i2c2_clk_root | driver_name: i2c2_root_clk | parent: system_pll3_clk
+  + clock i2c2_gate
 
-	<device name="hdmi" type="cdn,imx8mq-hdmi">
-		<io_mem address="0x32c00000" size="0x100000"/>
-		<io_mem address="0x32e40000" size="0x40000"/>
-		<irq    number="48"/>
-		<irq    number="57"/>
-	</device>
++ device dcss | type: nxp,imx8mq-dcss
+  + io_mem | address: 0x32e00000 | size: 0x2d000
+  + io_mem | address: 0x32e2f000 | size: 0x1000
+  + clock display_apb_clk_root  | driver_name: apb
+  + clock display_axi_clk_root  | parent: system_pll1_clk  | rate: 800000000
+                                | driver_name: axi
+  + clock display_rtrm_clk_root | parent: system_pll1_clk  | rate: 400000000
+                                | driver_name: rtrm
+  + clock video_pll2_clk        | parent: hdmi_phy_27m_clk | rate: 148500000
+                                | driver_name: pix
+  + clock display_dtrc_clk_root | driver_name: dtrc
+  + clock video_pll2_clk        | driver_name: pll_src
+  + clock hdmi_phy_27m_clk      | driver_name: pll_phy_ref
+  + clock video_pll1_clk        | parent: 25m_ref_clk      | rate: 25000000
+  + clock dc_pixel_clk_root     | parent: video_pll1_clk   | rate: 594000000
 
-	<device name="irqsteer" type="fsl,imx-irqsteer">
-		<io_mem address="0x32e2d000" size="0x1000"/>
-		<irq    number="50" />
-		<clock  name="display_apb_clk_root"
-		        driver_name="ipg"/>
-	</device>
++ device hdmi | type: cdn,imx8mq-hdmi
+  + io_mem | address: 0x32c00000 | size: 0x100000
+  + io_mem | address: 0x32e40000 | size: 0x40000
+  + irq    | number: 48
+  + irq    | number: 57
 
-	<device name="usb_host_1" type="snps,dwc3">
-		<io_mem       address="0x38100000" size="0x10000"/>
-		<irq          number="72"/>
-		<power-domain name="usb_otg_1"/>
-		<clock        name="usb_ctrl1_gate"
-		              driver_name="bus_early"/>
-		<clock        name="usb_core_ref_clk_root"
-		              parent="system_pll1_div8"
-		              rate="100000000"
-		              driver_name="ref"/>
-		<clock        name="usb_bus_clk_root"
-		              parent="system_pll2_div2"
-		              rate="500000000"/>
-		<clock        name="32k_ref_clk"
-		              driver_name="suspend"/>
-	</device>
++ device irqsteer | type: fsl,imx-irqsteer
+  + io_mem | address: 0x32e2d000 | size: 0x1000
+  + irq    | number: 50
+  + clock display_apb_clk_root | driver_name: ipg
 
-	<device name="usb_phy_1" type="fsl,imx8mq-usb-phy">
-		<io_mem address="0x381f0040" size="0x40"/>
-		<clock  name="usb_phy1_gate"
-		        driver_name="phy"/>
-		<clock  name="usb_phy_ref_clk_root"
-		        parent="system_pll1_div8"
-		        rate="100000000"/>
-	</device>
++ device usb_host_1 | type: snps,dwc3
+  + io_mem | address: 0x38100000 | size: 0x10000
+  + irq    | number: 72
+  + power-domain usb_otg_1
+  + clock usb_ctrl1_gate        | driver_name: bus_early
+  + clock usb_core_ref_clk_root | parent: system_pll1_div8 | rate: 100000000
+                                | driver_name: ref
+  + clock usb_bus_clk_root      | parent: system_pll2_div2 | rate: 500000000
+  + clock 32k_ref_clk           | driver_name: suspend
 
-	<device name="usb_host_2" type="snps,dwc3">
-		<io_mem       address="0x38200000" size="0x10000"/>
-		<irq          number="73"/>
-		<power-domain name="usb_otg_2"/>
-		<clock        name="usb_ctrl2_gate"
-		              driver_name="bus_early"/>
-		<clock        name="usb_core_ref_clk_root"
-		              parent="system_pll1_div8"
-		              rate="100000000"
-		              driver_name="ref"/>
-		<clock        name="usb_bus_clk_root"
-		              parent="system_pll2_div2"
-		              rate="500000000"/>
-		<clock        name="32k_ref_clk"
-		              driver_name="suspend"/>
-	</device>
++ device usb_phy_1 | type: fsl,imx8mq-usb-phy
+  + io_mem | address: 0x381f0040 | size: 0x40
+  + clock usb_phy1_gate        | driver_name: phy
+  + clock usb_phy_ref_clk_root | parent: system_pll1_div8 | rate: 100000000
 
-	<device name="usb_phy_2" type="fsl,imx8mq-usb-phy">
-		<io_mem address="0x382f0040" size="0x40"/>
-		<clock  name="usb_phy2_gate"
-		        driver_name="phy"/>
-		<clock  name="usb_phy_ref_clk_root"
-		        parent="system_pll1_div8"
-		        rate="100000000"/>
-	</device>
++ device usb_host_2 | type: snps,dwc3
+  + io_mem | address: 0x38200000 | size: 0x10000
+  + irq    | number: 73
+  + power-domain usb_otg_2
+  + clock usb_ctrl2_gate        | driver_name: bus_early
+  + clock usb_core_ref_clk_root | parent: system_pll1_div8 | rate: 100000000
+                                | driver_name: ref
+  + clock usb_bus_clk_root      | parent: system_pll2_div2 | rate: 500000000
+  + clock 32k_ref_clk           | driver_name: suspend
 
-	<device name="usdhc2" type="fsl,imx7d-usdhc">
-		<io_mem address="0x30b50000" size="0x10000"/>
-		<irq    number="55"/>
-		<clock  name="ipg_clk_root"
-		        driver_name="ipg"/>
-		<clock  name="nand_usdhc_bus_clk_root"
-		        driver_name="ahb"/>
-		<clock  name="usdhc2_clk_root"
-		        rate="200000000"
-		        driver_name="per"/>
-		<clock  name="usdhc2_gate"/>
-	</device>
++ device usb_phy_2 | type: fsl,imx8mq-usb-phy
+  + io_mem | address: 0x382f0040 | size: 0x40
+  + clock usb_phy2_gate        | driver_name: phy
+  + clock usb_phy_ref_clk_root | parent: system_pll1_div8 | rate: 100000000
 
-	<device name="fec" type="fsl,imx6sx-fec">
-		<io_mem   address="0x30be0000" size="0x10000"/>
-		<irq      number="153"/>
-		<irq      number="152"/>
-		<irq      number="151"/>
-		<irq      number="150"/>
-		<clock name="enet_axi_clk_root"/>
-		<clock name="enet_timer_clk_root" driver_name="ptp"/>
-		<clock name="enet_ref_clk_root" driver_name="enet_clk_ref"/>
-		<clock name="enet_phy_ref_clk_root" driver_name="enet_out"/>
-		<clock name="enet1_gate" driver_name="ipg"/>
-		<clock name="enet1_gate" driver_name="ahb"/>
-	</device>
++ device usdhc2 | type: fsl,imx7d-usdhc
+  + io_mem | address: 0x30b50000 | size: 0x10000
+  + irq    | number: 55
+  + clock ipg_clk_root            | driver_name: ipg
+  + clock nand_usdhc_bus_clk_root | driver_name: ahb
+  + clock usdhc2_clk_root         | driver_name: per | rate: 200000000
+  + clock usdhc2_gate
 
-	<device name="gpu" type="vivante,gc">
-		<io_mem       address="0x38000000" size="0x40000"/>
-		<irq          number="35"/>
-		<power-domain name="gpu"/>
-		<clock        name="gpu_gate"/>
-		<clock        name="gpu_core_clk_root"
-		              parent="gpu_pll_clk"
-		              rate="800000000"
-		              driver_name="core"/>
-		<clock        name="gpu_shader_clk"
-		              parent="gpu_pll_clk"
-		              rate="800000000"
-		              driver_name="shader"/>
-		<clock        name="gpu_axi_clk_root"
-		              parent="gpu_pll_clk"
-		              rate="800000000"
-		              driver_name="bus"/>
-		<clock        name="gpu_ahb_clk_root"
-		              parent="gpu_pll_clk"
-		              rate="800000000"
-		              driver_name="reg"/>
-	</device>
-</devices>
++ device fec | type: fsl,imx6sx-fec
+  + io_mem | address: 0x30be0000 | size: 0x10000
+  + irq    | number: 153
+  + irq    | number: 152
+  + irq    | number: 151
+  + irq    | number: 150
+  + clock enet_axi_clk_root
+  + clock enet_timer_clk_root   | driver_name: ptp
+  + clock enet_ref_clk_root     | driver_name: enet_clk_ref
+  + clock enet_phy_ref_clk_root | driver_name: enet_out
+  + clock enet1_gate            | driver_name: ipg
+  + clock enet1_gate            | driver_name: ahb
+
++ device gpu | type: vivante,gc
+  + io_mem | address: 0x38000000 | size: 0x40000
+  + irq    | number: 35
+  + power-domain gpu
+  + clock gpu_gate
+  + clock gpu_core_clk_root | parent: gpu_pll_clk | rate: 800000000
+                            | driver_name: core
+  + clock gpu_shader_clk    | parent: gpu_pll_clk | rate: 800000000
+                            | driver_name: shader
+  + clock gpu_axi_clk_root  | parent: gpu_pll_clk | rate: 800000000
+                            | driver_name: bus
+  + clock gpu_ahb_clk_root  | parent: gpu_pll_clk | rate: 800000000
+                            | driver_name: reg
+-
