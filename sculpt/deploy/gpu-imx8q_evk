@@ -1,19 +1,15 @@
-<config arch="">
+config | arch:
 
-	<common_routes>
-		<service name="ROM" label_last="ld.lib.so"> <parent/> </service>
-		<service name="ROM" label_last="init">      <parent/> </service>
-		<service name="CPU">   <parent/> </service>
-		<service name="PD">    <parent/> </service>
-		<service name="LOG">   <parent/> </service>
-		<service name="Timer"> <parent/> </service>
-	</common_routes>
++ common_routes
+  + service ROM | label_last: ld.lib.so | + parent
+  + service ROM | label_last: init      | + parent
+  + service CPU                         | + parent
+  + service PD                          | + parent
+  + service LOG                         | + parent
+  + service Timer                       | + parent
 
-	<start name="gpu_test" pkg="glmark2-imx8q_evk">
-		<route>
-			<service name="Platform"> <parent label="gpu"/> </service>
-			<service name="Gui">      <parent/>             </service>
-		</route>
-	</start>
-
-</config>
++ start gpu_test | pkg: glmark2-imx8q_evk
+  + route
+    + service Platform | + parent | label: gpu
+    + service Gui      | + parent
+-

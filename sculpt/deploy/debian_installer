@@ -1,102 +1,68 @@
-<config arch="" info="Debian Installer using ARM VMM">
+config | arch: | info: Debian Installer using ARM VMM
 
-	<common_routes>
-		<service name="ROM" label_last="ld.lib.so"> <parent/> </service>
-		<service name="ROM" label_last="init">      <parent/> </service>
-		<service name="CPU">   <parent/> </service>
-		<service name="PD">    <parent/> </service>
-		<service name="LOG">   <parent/> </service>
-		<service name="Timer"> <parent/> </service>
-	</common_routes>
++ common_routes
+  + service ROM | label_last: ld.lib.so | + parent
+  + service ROM | label_last: init      | + parent
+  + service CPU                         | + parent
+  + service PD                          | + parent
+  + service LOG                         | + parent
+  + service Timer                       | + parent
 
-	<start name="window_layouter" priority="-1" pkg="window_layouter">
-		<route>
-			<service name="Gui">                           <child name="wm"/> </service>
-			<service name="ROM" label="window_list">       <child name="wm"/> </service>
-			<service name="ROM" label="focus_request">     <child name="wm"/> </service>
-			<service name="ROM" label="hover">             <child name="wm"/> </service>
-			<service name="ROM" label="decorator_margins"> <child name="wm"/> </service>
-			<service name="Report">                        <child name="wm"/> </service>
-			<service name="File_system" label_prefix="recall ->">
-				<child name="recall_fs"/>
-			</service>
-		</route>
-	</start>
++ start window_layouter | priority: -1 | pkg: window_layouter
+  + route
+    + service Gui                                   | + child wm
+    + service ROM | label: window_list              | + child wm
+    + service ROM | label: focus_request            | + child wm
+    + service ROM | label: hover                    | + child wm
+    + service ROM | label: decorator_margins        | + child wm
+    + service Report                                | + child wm
+    + service File_system | label_prefix: recall -> | + child recall_fs
 
-	<start name="themed_decorator" priority="-1" pkg="themed_decorator">
-		<route>
-			<service name="ROM" label="window_layout"> <child name="wm"/> </service>
-			<service name="ROM" label="pointer">       <child name="wm"/> </service>
-			<service name="Report">                    <child name="wm"/> </service>
-			<service name="Gui">                       <child name="wm"/> </service>
-		</route>
-	</start>
++ start themed_decorator | priority: -1 | pkg: themed_decorator
+  + route
+    + service ROM | label: window_layout | + child wm
+    + service ROM | label: pointer       | + child wm
+    + service Report                     | + child wm
+    + service Gui                        | + child wm
 
-	<start name="wm" priority="-1" pkg="wm">
-		<route>
-			<service name="Gui" label="focus"> <parent label="focus"/> </service>
-			<service name="Gui">                           <parent/> </service>
-			<service name="Report" label_last="shape">     <parent/> </service>
-			<service name="Report" label_last="clipboard"> <parent/> </service>
-			<service name="ROM"    label_last="clipboard"> <parent/> </service>
-		</route>
-	</start>
++ start wm | priority: -1 | pkg: wm
+  + route
+    + service Gui | label: focus             | + parent | label: focus
+    + service Gui                            | + parent
+    + service Report | label_last: shape     | + parent
+    + service Report | label_last: clipboard | + parent
+    + service ROM    | label_last: clipboard | + parent
 
-	<start name="fonts_fs" priority="-2" pkg="fonts_fs">
-		<route>
-			<service name="ROM" label="config">
-				<parent label="config -> managed/fonts"/>
-			</service>
-		</route>
-	</start>
++ start fonts_fs | priority: -2 | pkg: fonts_fs
+  + route
+    + service ROM | label: config | + parent | label: config -> managed/fonts
 
-	<start name="recall_fs" priority="-2" pkg="recall_fs">
-		<route>
-			<service name="File_system"> <child name="default_fs_rw"/> </service>
-		</route>
-	</start>
++ start recall_fs | priority: -2 | pkg: recall_fs
+  + route
+    + service File_system | + child default_fs_rw
 
-	<start name="wm_backdrop" priority="-2" pkg="sticks_blue_backdrop">
-		<route>
-			<service name="Gui"> <parent label="backdrop"/> </service>
-		</route>
-		<config>
-			<libc/>
-			<vfs>
-				<rom name="genode_logo.png"/>
-				<rom name="grid.png"/>
-				<rom name="sticks_blue.png"/>
-			</vfs>
-			<fill color="#223344" />
-			<image png="sticks_blue.png" scale="zoom" anchor="bottom_left" alpha="200"/>
-			<image png="grid.png"        tiled="yes" alpha="200" />
-			<image png="genode_logo.png" anchor="bottom_right" alpha="150"
-			                             xpos="-20" ypos="-20" />
-		</config>
-	</start>
++ start wm_backdrop | priority: -2 | pkg: sticks_blue_backdrop
+  + route | + service Gui | + parent | label: backdrop
+  + config
+    + libc
+    + vfs
+      + rom genode_logo.png
+      + rom grid.png
+      + rom sticks_blue.png
+    + fill | color: #223344
+    + image | png: sticks_blue.png | alpha: 200 | anchor: bottom_left | scale: zoom
+    + image | png: grid.png        | alpha: 200 | tiled: yes
+    + image | png: genode_logo.png | alpha: 150 | anchor: bottom_right
+                                                | xpos: -20 | ypos: -20
 
-	<start name="black_hole" priority="-2" pkg="black_hole">
-		<route/>
-	</start>
++ start black_hole | priority: -2 | pkg: black_hole
+  + route
 
-	<start name="debian_installer" pkg="skalk/pkg/vmm-debian-installer-arm64/2023-10-23">
-		<route>
-			<service name="Nic">
-				<child name="nic_router"/>
-			</service>
-			<service name="File_system">
-				<child name="recall_fs"/>
-			</service>
-			<service name="Gui">
-				<child name="wm"/>
-			</service>
-			<service name="VM">
-				<parent/>
-			</service>
-			<service name="RM">
-				<parent/>
-			</service>
-		</route>
-	</start>
-
-</config>
++ start debian_installer | pkg: skalk/pkg/vmm-debian-installer-arm64/2023-10-23
+  + route
+    + service Nic         | + child nic_router
+    + service File_system | + child recall_fs
+    + service Gui         | + child wm
+    + service VM          | + parent
+    + service RM          | + parent
+-

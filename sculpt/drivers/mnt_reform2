@@ -1,209 +1,177 @@
-<config>
+config
++ parent-provides
+  + service ROM
+  + service IRQ
+  + service IO_MEM
+  + service PD
+  + service RM
+  + service CPU
+  + service LOG
+  + service Timer
+  + service Report
+  + service Capture
+  + service Event
 
-	<parent-provides>
-		<service name="ROM"/>
-		<service name="IRQ"/>
-		<service name="IO_MEM"/>
-		<service name="PD"/>
-		<service name="RM"/>
-		<service name="CPU"/>
-		<service name="LOG"/>
-		<service name="Timer"/>
-		<service name="Report"/>
-		<service name="Capture"/>
-		<service name="Event"/>
-	</parent-provides>
++ report | child_caps: yes | child_ram: yes | init_caps: yes | init_ram: yes
+         | delay_ms: 5000
 
-	<report child_caps="true" child_ram="true" init_caps="true" init_ram="true" delay_ms="5000"/>
++ default-route
+  + any-service
+    + parent
+    + any-child
 
-	<default-route>
-		<any-service> <parent/> <any-child/> </any-service>
-	</default-route>
++ default | caps: 100 | ram: 1M
 
-	<default caps="100" ram="1M"/>
++ service I2c      | + default-policy | + child i2c
++ service Platform | + default-policy | + child platform
 
-	<service name="I2c">
-		<default-policy> <child name="i2c"/> </default-policy> </service>
++ start report_rom | ram: 2M
+  + provides
+    + service Report
+    + service ROM
+  + config | verbose: no
+    + policy | label:  rom_reporter -> pci_devices | report: imx8mq_pci_host -> devices
+    + policy | label:  rom_filter -> pci_devices   | report: imx8mq_pci_host -> devices
 
-	<service name="Platform">
-		<default-policy> <child name="platform"/> </default-policy> </service>
++ start rom_filter | caps: 70
+  + provides | + service ROM
+  + config | buffer: 32K
+  | + input devices
+  | + input pci_devices
+  | + output | node: devices
+  |   + input devices     | skip_toplevel: yes
+  |   + input pci_devices | skip_toplevel: yes
+  + route
+    + service ROM | label: pci_devices | + child report_rom
+    + service LOG                      | + parent
+    + service PD                       | + parent
+    + service CPU                      | + parent
+    + service ROM                      | + parent
 
-	<start name="report_rom" ram="2M">
-		<provides> <service name="Report"/> <service name="ROM"/> </provides>
-		<config verbose="no">
-			<policy label="rom_reporter -> pci_devices"   report="imx8mq_pci_host -> devices"/>
-			<policy label="rom_filter -> pci_devices"     report="imx8mq_pci_host -> devices"/>
-		</config>
-	</start>
++ start rom_reporter
+  + config | + rom | label: pci_devices
+  + route
+    + service ROM    | label: pci_devices | + child report_rom
+    + service Report | label: pci_devices | + parent | label: pci_devices
+    + service LOG                         | + parent
+    + service PD                          | + parent
+    + service CPU                         | + parent
+    + service ROM                         | + parent
 
-	<start name="rom_filter" caps="70">
-		<provides> <service name="ROM" /> </provides>
-		<config buffer="32K">
-			<input name="devices"/>
-			<input name="pci_devices"/>
-			<output node="devices">
-				<input name="devices"     skip_toplevel="yes"/>
-				<input name="pci_devices" skip_toplevel="yes"/>
-			</output>
-		</config>
-		<route>
-			<service name="ROM" label="pci_devices"> <child name="report_rom"/> </service>
-			<service name="LOG"> <parent/> </service>
-			<service name="PD">  <parent/> </service>
-			<service name="CPU"> <parent/> </service>
-			<service name="ROM"> <parent/> </service>
-		</route>
-	</start>
++ start platform | caps: 300 | ram: 3M | managing_system: yes
+  + binary imx8mq_platform
+  + provides | + service Platform
+  + config | ld_verbose: yes
+  | + report | devices: yes
+  |
+  | + policy | label_prefix: runtime -> fb | info: yes
+  |   + device dcss
+  |   + device hdmi
+  |   + device mipi_dsi
+  |   + device mipi_dsi_phy
+  |   + device lcd
+  |   + device irqsteer
+  |   + device pclk
+  |   + device esc
+  |   + device dpi
+  |
+  | + policy | label: imx8mq_pwm ->
+  |   + device pwm
+  |
+  | + policy | label: gpio ->  | info: yes
+  |   + device gpio1
+  |   + device gpio2
+  |   + device gpio3
+  |   + device gpio4
+  |   + device gpio5
+  |
+  | + policy | label: i2c ->
+  |   + device i2c
+  |
+  | + policy | label_prefix: runtime -> usb | info: yes
+  |   + device usb_host_1
+  |   + device usb_phy_1
+  |   + device usb_host_2
+  |   + device usb_phy_2
+  |
+  | + policy | label_prefix: runtime -> mmc | info: yes
+  |   + device usdhc1
+  |   + device usdhc2
+  |
+  | + policy | label: runtime -> nic | info: yes
+  |   + device fec
+  |
+  | + policy | label: runtime -> gpu | info: yes
+  |   + device gpu
+  |
+  | + policy | label: imx8mq_pci_host -> | info: yes
+  |   + device pcie_1
+  |   + device pcie_2
+  |
+  | + policy | label_prefix: runtime -> nvme | info: yes
+  |   + pci | class: NVME
+  |
+  | + policy | label_prefix: runtime -> wifi | info: yes
+  |   + pci | class: WIFI
+  |
+  + route
+    + service Report | label: devices | + parent | label: devices
+    + service ROM    | label: devices | + child rom_filter
+    + any-service                     | + parent
 
-	<start name="rom_reporter">
-		<config> <rom label="pci_devices"/> </config>
-		<route>
-			<service name="ROM"    label="pci_devices">   <child name="report_rom"/> </service>
-			<service name="Report" label="pci_devices">   <parent label="pci_devices"/> </service>
-			<service name="LOG"> <parent/> </service>
-			<service name="PD">  <parent/> </service>
-			<service name="CPU"> <parent/> </service>
-			<service name="ROM"> <parent/> </service>
-		</route>
-	</start>
++ start gpio | caps: 150 | ram: 2M
+  + binary imx_pio
+  + provides
+    + service Pin_state
+    + service Pin_control
+    + service IRQ
+  + config
+    + out backlight            | bank: 0 | index: 10 | default: on
+    + out edp_bridge           | bank: 2 | index: 20 | default: on
+    + out pcie0_reset_deassert | bank: 4 | index:  7 | default: on
+    + out pcie1_reset_deassert | bank: 2 | index: 23 | default: on
+    + policy | label: imx8mq_pci_host -> | pin: pcie0_reset_deassert
+  + route
+    + service RM       | + parent
+    + service ROM      | + parent
+    + service PD       | + parent
+    + service CPU      | + parent
+    + service LOG      | + parent
+    + service Platform | + child platform
 
-	<start name="platform" caps="300" ram="3M" managing_system="yes">
-		<binary name="imx8mq_platform"/>
-		<provides> <service name="Platform"/> </provides>
-		<config ld_verbose="yes">
-			<report devices="yes"/>
-			<policy label_prefix="runtime -> fb" info="yes">
-				<device name="dcss"/>
-				<device name="hdmi"/>
-				<device name="mipi_dsi"/>
-				<device name="mipi_dsi_phy"/>
-				<device name="lcd"/>
-				<device name="irqsteer"/>
-				<device name="pclk"/>
-				<device name="esc"/>
-				<device name="dpi"/>
-			</policy>
++ start imx8mq_pci_host
+  + route
+    + service RM        | + parent
+    + service ROM       | + parent
+    + service PD        | + parent
+    + service CPU       | + parent
+    + service LOG       | + parent
+    + service Timer     | + parent
+    + service Report    | + child report_rom
+    + service Platform  | + child platform
+    + service Pin_state | + child gpio
 
-			<policy label="imx8mq_pwm -> ">
-				<device name="pwm"/>
-			</policy>
++ start i2c | caps: 150 | ram: 2M
+  + binary imx8q_evk_i2c
+  + provides | + service I2c
+  + config | verbose: yes
+    + policy | label_prefix: runtime -> fb | bus_address: 0x2c
+  + route
+    + service RM       | + parent
+    + service ROM      | + parent
+    + service PD       | + parent
+    + service CPU      | + parent
+    + service LOG      | + parent
+    + service Timer    | + parent
+    + service Platform | + child platform
 
-			<policy label="gpio -> " info="yes">
-				<device name="gpio1"/>
-				<device name="gpio2"/>
-				<device name="gpio3"/>
-				<device name="gpio4"/>
-				<device name="gpio5"/>
-			</policy>
-
-			<policy label="i2c -> ">
-				<device name="i2c"/>
-			</policy>
-
-			<policy label_prefix="runtime -> usb" info="yes">
-				<device name="usb_host_1"/>
-				<device name="usb_phy_1"/>
-				<device name="usb_host_2"/>
-				<device name="usb_phy_2"/>
-			</policy>
-
-			<policy label_prefix="runtime -> mmc" info="yes">
-				<device name="usdhc1"/>
-				<device name="usdhc2"/>
-			</policy>
-
-			<policy label="runtime -> nic" info="yes">
-				<device name="fec"/>
-			</policy>
-
-			<policy label="runtime -> gpu" info="yes">
-				<device name="gpu"/>
-			</policy>
-
-			<policy label="imx8mq_pci_host -> " info="yes">
-				<device name="pcie_1"/>
-				<device name="pcie_2"/>
-			</policy>
-
-			<policy label_prefix="runtime -> nvme" info="yes">
-				<pci class="NVME"/>
-			</policy>
-
-			<policy label_prefix="runtime -> wifi" info="yes">
-				<pci class="WIFI"/>
-			</policy>
-		</config>
-		<route>
-			<service name="Report" label="devices"> <parent label="devices"/> </service>
-			<service name="ROM" label="devices"> <child name="rom_filter"/> </service>
-			<any-service> <parent/> </any-service>
-		</route>
-	</start>
-
-	<start name="gpio" caps="150" ram="2M">
-		<binary name="imx_pio"/>
-		<provides>
-			<service name="Pin_state"/>
-			<service name="Pin_control"/>
-			<service name="IRQ"/>
-		</provides>
-		<route>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Platform"> <child name="platform"/> </service>
-		</route>
-		<config>
-			<out name="backlight"  index="10" bank="0" default="on"/>
-			<out name="edp_bridge" index="20" bank="2" default="on"/>
-			<out name="pcie0_reset_deassert" bank="4" index="7"  default="on"/>
-			<out name="pcie1_reset_deassert" bank="2" index="23" default="on"/>
-			<policy label="imx8mq_pci_host -> " pin="pcie0_reset_deassert"/>
-		</config>
-	</start>
-
-	<start name="imx8mq_pci_host">
-		<route>
-			<service name="RM">        <parent/> </service>
-			<service name="ROM">       <parent/> </service>
-			<service name="PD">        <parent/> </service>
-			<service name="CPU">       <parent/> </service>
-			<service name="LOG">       <parent/> </service>
-			<service name="Timer">     <parent/> </service>
-			<service name="Report">    <child name="report_rom"/> </service>
-			<service name="Platform">  <child name="platform"/>   </service>
-			<service name="Pin_state"> <child name="gpio"/>       </service>
-		</route>
-	</start>
-
-	<start name="i2c" caps="150" ram="2M">
-		<binary name="imx8q_evk_i2c"/>
-		<provides><service name="I2c"/></provides>
-		<route>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Timer">    <parent/> </service>
-			<service name="Platform"> <child name="platform"/> </service>
-		</route>
-		<config verbose="yes">
-			<policy label_prefix="runtime -> fb" bus_address="0x2c"/>
-		</config>
-	</start>
-
-	<start name="imx8mq_pwm" caps="100" ram="2M">
-		<route>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Platform"> <child name="platform"/> </service>
-		</route>
-		<config period="248" sample="250" clock_source="ipg_highfreq"/>
-	</start>
-</config>
++ start imx8mq_pwm | caps: 100 | ram: 2M
+  + config | period: 248 | sample: 250 | clock_source: ipg_highfreq
+  + route
+    + service RM       | + parent
+    + service ROM      | + parent
+    + service PD       | + parent
+    + service CPU      | + parent
+    + service LOG      | + parent
+    + service Platform | + child platform
+-

@@ -1,5 +1,3 @@
-<launcher pkg="sntp_dummy_rtc" priority="-1">
-	<route>
-		<service name="Nic"> <child name="nic_router"/> </service>
-	</route>
-</launcher>
+launcher | pkg: sntp_dummy_rtc | priority: -1
++ route | + service Nic | + child nic_router
+-
