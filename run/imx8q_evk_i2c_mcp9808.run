@@ -10,55 +10,46 @@ import_from_depot [depot_user]/src/[base_src] \
 build { driver/i2c test/i2c_mcp9808 }
 
 install_config {
-	<config>
-	<parent-provides>
-			<service name="ROM"/>
-			<service name="IRQ"/>
-			<service name="IO_MEM"/>
-			<service name="PD"/>
-			<service name="RM"/>
-			<service name="CPU"/>
-			<service name="LOG"/>
-		</parent-provides>
+config
++ parent-provides
+  + service ROM
+  + service IRQ
+  + service IO_MEM
+  + service PD
+  + service RM
+  + service CPU
+  + service LOG
 
-		<default-route>
-			<any-service> <parent/> <any-child/> </any-service>
-		</default-route>
++ default-route
+  + any-service
+    + parent
+    + any-child
 
-		<default caps="100" ram="1M"/>
++ default | caps: 100 | ram: 1M
 
-		<start name="timer">
-			<provides><service name="Timer"/></provides>
-		</start>
++ start timer
+  + provides | + service Timer
 
-		<start name="platform" caps="800" ram="4M" managing_system="yes">
-			<binary name="imx8mq_platform"/>
-			<provides>
-				<service name="Platform"/>
-			</provides>
-			<config>
-				<policy label_prefix="imx8q_evk_i2c"> <device name="i2c2"/> </policy>
-			</config>
-		</start>
++ start platform | caps: 800 | ram: 4M | managing_system: yes
+  + binary imx8mq_platform
+  + provides | + service Platform
+  + config
+    + policy | label_prefix: imx8q_evk_i2c | + device i2c2
 
-		<start name="imx8q_evk_i2c">
-			<provides> <service name="I2c"/> </provides>
-			<config bus_no="2" verbose="yes">
-				<policy label_prefix="MCP_9808"  bus_address="0x18"/>
-			</config>
-			<route>
-				<any-service> <parent/> <any-child/> </any-service>
-			</route>
-		</start>
++ start imx8q_evk_i2c
+  + provides | + service I2c
+  + config | bus_no: 2 | verbose: yes
+    + policy | label_prefix: MCP_9808 | bus_address: 0x18
+  + route
+    + any-service
+      + parent
+      + any-child
 
-		<start name="i2c_mcp9808">
-			<route>
-				<service name="I2c"> <child name="imx8q_evk_i2c" label="MCP_9808"/> </service>
-				<any-service> <parent/> </any-service>
-			</route>
-		</start>
-
-	</config>
++ start i2c_mcp9808
+  + route
+    + service I2c | + child imx8q_evk_i2c | label: MCP_9808
+    + any-service | + parent
+-
 }
 
 build_boot_image [build_artifacts]

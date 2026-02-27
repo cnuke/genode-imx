@@ -11,79 +11,66 @@ import_from_depot [depot_user]/src/[base_src] \
 build { app/block_tester }
 
 install_config {
-<config>
-	<parent-provides>
-		<service name="ROM"/>
-		<service name="IRQ"/>
-		<service name="IO_MEM"/>
-		<service name="PD"/>
-		<service name="RM"/>
-		<service name="CPU"/>
-		<service name="LOG"/>
-	</parent-provides>
-	<default caps="100" ram="1M"/>
+config
++ parent-provides
+  + service ROM
+  + service IRQ
+  + service IO_MEM
+  + service PD
+  + service RM
+  + service CPU
+  + service LOG
 
-	<start name="imx8mq_platform" ram="2M" managing_system="yes">
-		<provides><service name="Platform"/></provides>
-		<config>
-			<policy label="sd_card -> " info="yes">
-				<device name="usdhc1"/>
-				<device name="usdhc2"/>
-			</policy>
-		</config>
-		<route>
-			<any-service> <parent/> </any-service>
-		</route>
-	</start>
++ default | caps: 100 | ram: 1M
 
-	<start name="timer">
-		<provides><service name="Timer"/></provides>
-		<route> <any-service> <parent/> </any-service> </route>
-	</start>
++ start imx8mq_platform | ram: 2M | managing_system: yes
+  + provides | + service Platform
+  + config
+  | + policy | label: sd_card ->  | info: yes
+  |   + device usdhc1
+  |   + device usdhc2
+  + route | + any-service | + parent
 
-	<start name="report_rom" ram="2M">
-		<provides> <service name="Report"/> <service name="ROM"/> </provides>
-		<config verbose="yes">
-		</config>
-		<route> <any-service> <parent/> </any-service> </route>
-	</start>
++ start timer
+  + provides | + service Timer
+  + route | + any-service | + parent
 
-	<start name="sd_card" caps="300" ram="16M">
-		<binary name="imx8mq_sd_card"/>
-		<provides><service name="Block"/></provides>
-		<config report="yes">
-			<default-policy device="mmcblk1"/>
-		</config>
-		<route>
-			<service name="ROM" label="dtb">
-				<parent label="imx8mq_sd_card-mnt_reform2.dtb"/>
-			</service>
-			<service name="ROM"> <parent/> </service>
-			<service name="PD">  <parent/> </service>
-			<service name="RM">  <parent/> </service>
-			<service name="CPU"> <parent/> </service>
-			<service name="LOG"> <parent/> </service>
-			<any-service> <any-child/> </any-service>
-		</route>
-	</start>
++ start report_rom | ram: 2M
+  + provides
+    + service Report
+    + service ROM
+  + config | verbose: yes
+  + route | + any-service | + parent
 
-	<start name="block_tester" ram="64M">
-		<config verbose="no" report="no" log="yes" stop_on_error="no">
-			<tests>
-				<sequential length="256M" size="1M" io_buffer="8M" batch="4"/>
-				<sequential start="2097152" write="yes" length="256M" size="1M" io_buffer="8M" batch="4"/>
-			</tests>
-		</config>
-		<route>
-			<service name="ROM"> <parent/> </service>
-			<service name="PD">  <parent/> </service>
-			<service name="RM">  <parent/> </service>
-			<service name="CPU"> <parent/> </service>
-			<service name="LOG"> <parent/> </service>
-			<any-service> <any-child/> </any-service>
-		</route>
-	</start>
-</config> }
++ start sd_card | caps: 300 | ram: 16M
+  + binary imx8mq_sd_card
+  + provides | + service Block
+  + config | report: yes
+    + default-policy | device: mmcblk1
+  + route
+    + service ROM | label: dtb | + parent | label: imx8mq_sd_card-mnt_reform2.dtb
+    + service ROM              | + parent
+    + service PD               | + parent
+    + service RM               | + parent
+    + service CPU              | + parent
+    + service LOG              | + parent
+    + any-service              | + any-child
+
++ start block_tester | ram: 64M
+  + config | verbose: no | report: no | log: yes | stop_on_error: no
+  | + tests
+  |   + sequential | length: 256M | size: 1M | io_buffer: 8M | batch: 4
+  |   + sequential | length: 256M | size: 1M | io_buffer: 8M | batch: 4
+  |                  start: 2097152 | write: yes
+  + route
+    + service ROM | + parent
+    + service PD  | + parent
+    + service RM  | + parent
+    + service CPU | + parent
+    + service LOG | + parent
+    + any-service | + any-child
+-
+}
 
 build_boot_image [build_artifacts]
 

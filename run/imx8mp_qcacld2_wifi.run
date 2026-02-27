@@ -48,270 +48,212 @@ build {
 #
 #   { ssid protection passphrase explicit_scan }
 #
-# Example dynamic_rom config:
-#
-#   {<inline description="auto-connect both networks">
-#   } [wifi_config 30 5 no [list "net1 WPA2 net1_psk no" "net2 WPA2 net2_psk no"]] {
-#   </inline>
-#   <inline description="aquto-connect both, but net2 explicitly">
-#   } [wifi_config 30 5 no [list "net1 WPA2 net1_psk no" "net2 WPA2 net2_psk yes"]] {
-#   </inline>}
 
-set wifi_verbose false
+set wifi_verbose "no"
 
 proc wifi_config { scan_interval rfkill networks } {
 	global wifi_verbose
 	global wifi_verbose_state
 
-	set    config "<wifi_config"
-	append config " verbose=\"$wifi_verbose\""
-	append config " scan_interval=\"$scan_interval\""
-	append config " rfkill=\"$rfkill\""
-	append config ">\n"
-	foreach n $networks {
-		append config "  <network"
-		append config " ssid=\"[lindex $n 0]\""
-		append config " protection=\"[lindex $n 1]\""
-		append config " passphrase=\"[lindex $n 2]\""
-		append config " auto_connect=\"[lindex $n 3]\""
-		append config " explicit_scan=\"[lindex $n 4]\""
-		append config "/>\n"
-	}
-	append config "</wifi_config>\n"
+	append config " | verbose: "       $wifi_verbose \
+	              " | scan_interval: " $scan_interval \
+	              " | rfkill: "        $rfkill
 
+	set indent "  |     "
+	foreach n $networks {
+		append config "\n$indent  + network | ssid: "          [lindex $n 0] \
+		                                " | protection:"     [lindex $n 1] \
+		                                " | passphrase:"     [lindex $n 2] \
+		                                " | auto_connect:"   [lindex $n 3] \
+		                                " | explicit_scan:"  [lindex $n 4]
+	}
 	return $config
 }
 
 install_config {
-	<config prio_levels="2">
-		<parent-provides>
-			<service name="LOG"/>
-			<service name="PD"/>
-			<service name="CPU"/>
-			<service name="ROM"/>
-			<service name="IO_MEM"/>
-			<service name="IRQ"/>
-		</parent-provides>
+config | prio_levels: 2
++ parent-provides
+  + service LOG
+  + service PD
+  + service CPU
+  + service ROM
+  + service IO_MEM
+  + service IRQ
 
-		<default caps="100" ram="1M"/>
++ default | caps: 100 | ram: 1M
 
-		<start name="timer">
-			<route> <any-service> <parent/> </any-service> </route>
-			<provides> <service name="Timer"/> </provides>
-		</start>
++ start timer
+  + route | + any-service | + parent
+  + provides | + service Timer
 
-		<start name="system_report_rom" ram="2M">
-			<binary name="report_rom"/>
-			<provides> <service name="Report"/> <service name="ROM"/> </provides>
-			<config verbose="no">
-				<default-policy report="dummy-report"/>
-			</config>
-			<route>
-				<service name="ROM"> <parent/> </service>
-				<service name="CPU"> <parent/> </service>
-				<service name="PD">  <parent/> </service>
-				<service name="LOG"> <parent/> </service>
-				<service name="Rtc"> <any-child/> </service>
-			</route>
-		</start>
++ start system_report_rom | ram: 2M
+  + binary report_rom
+  + provides
+    + service Report
+    + service ROM
+  + config | verbose: no
+    + default-policy | report: dummy-report
+  + route
+    + service ROM | + parent
+    + service CPU | + parent
+    + service PD  | + parent
+    + service LOG | + parent
+    + service Rtc | + any-child
 
-		<start name="platform" caps="150" ram="2M" managing_system="yes">
-			<binary name="imx8mp_platform"/>
-			<provides> <service name="Platform"/> </provides>
-			<config>
-				<policy label="imx_pio -> ">
-					<device name="gpio2"/>
-				</policy>
++ start platform | caps: 150 | ram: 2M | managing_system: yes
+  + binary imx8mp_platform
+  + provides | + service Platform
+  + config
+    + policy | label: imx_pio ->           | + device gpio2
+    + policy | label: wifi ->  | info: yes | + device usdhc2
+  + route
+    + service ROM | label: system | + child system_report_rom
+    + any-service                 | + parent
 
-				<policy label="wifi -> " info="yes">
-					<device name="usdhc2"/>
-				</policy>
-			</config>
-			<route>
-				<service name="ROM" label="system"> <child name="system_report_rom"/> </service>
-				<any-service> <parent/> </any-service>
-			</route>
-		</start>
++ start imx_pio
+  + provides
+    + service Pin_state
+    + service Pin_control
+    + service IRQ
+  + config
+    + out wlan_vmmc | index: 19 | bank: 0 | default: on
+  + route
+    + service ROM      | + parent
+    + service CPU      | + parent
+    + service PD       | + parent
+    + service LOG      | + parent
+    + service Platform | + child platform
 
-		<start name="imx_pio">
-			<provides>
-				<service name="Pin_state"/>
-				<service name="Pin_control"/>
-				<service name="IRQ"/>
-			</provides>
-			<config>
-				<out name="wlan_vmmc" index="19" bank="0" default="on"/>
-			</config>
-			<route>
-				<service name="ROM"> <parent/> </service>
-				<service name="CPU"> <parent/> </service>
-				<service name="PD">  <parent/> </service>
-				<service name="LOG"> <parent/> </service>
-				<service name="Platform"> <child name="platform"/> </service>
-			</route>
-		</start>
++ start test-lwip_httpsrv | ram: 128M
+  + config
+  | + libc | stdout: /dev/null | stderr: /dev/log | socket: /socket
+  | + vfs
+  |   + dir dev
+  |   | + log
+  |   | + null
+  |   + dir socket
+  |     + lwip | dhcp: yes
+  + route
+    + service Nic | + child nic_router
+    + any-service
+      + parent
+      + any-child
 
-		<start name="test-lwip_httpsrv" ram="128M">
-			<config>
-				<libc stdout="/dev/null" stderr="/dev/log" socket="/socket"/>
-				<vfs>
-					<dir name="dev"> <log/> <null/> </dir>
-					<dir name="socket"> <lwip dhcp="yes"/> </dir>
-				</vfs>
-			</config>
-			<route>
-				<service name="Nic"> <child name="nic_router"/> </service>
-				<any-service> <parent/> <any-child/> </any-service>
-			</route>
-		</start>
++ start nic_router | caps: 150 | ram: 8M
+  + provides
+  | + service Nic
+  | + service Uplink
+  + config | verbose: no | verbose_domain_state: yes | dhcp_discover_timeout_sec: 10
+  |                                                  | dhcp_request_timeout_sec:  6
+  | + policy | label_prefix: test-lwip_httpsrv | domain: downlink
+  | + policy | label_prefix: wifi              | domain: uplink
+  | + domain uplink | verbose_packets: no | verbose_packet_drop: no | icmp_echo_server: yes
+  |   + nat | domain: downlink | tcp-ports: 16384
+  |   + tcp-forward | port: 443 | domain: downlink | to: 10.0.3.2
+  |   + tcp-forward | port:  80 | domain: downlink | to: 10.0.3.2
+  | + domain downlink | verbose_packets: no | verbose_packet_drop: no
+  |                   | interface: 10.0.3.1/24
+  |   + dhcp-server | ip_first: 10.0.3.2 | ip_last: 10.0.3.2
+  + route
+    + service ROM   | + parent
+    + service CPU   | + parent
+    + service PD    | + parent
+    + service LOG   | + parent
+    + service Timer | + child timer
 
-		<start name="nic_router" caps="150" ram="8M">
-			<provides>
-				<service name="Nic"/>
-				<service name="Uplink"/>
-			</provides>
-			<config verbose="no" verbose_domain_state="yes" dhcp_discover_timeout_sec="10" dhcp_request_timeout_sec="6">
++ start dummy_rtc
+  + provides | + service Rtc
+  + config | year: 2023 | month: 02 | day: 27 | hour: 12 | minute: 0 | second: 0
+  + route | + any-service | + parent
 
-				<policy label_prefix="test-lwip_httpsrv" domain="downlink"/>
-				<policy label_prefix="wifi"              domain="uplink"/>
++ start state_report_rom | ram: 2M
+  + binary report_rom
+  + provides
+    + service Report
+    + service ROM
+  + config | verbose: no
+  + route
+    + service ROM | + parent
+    + service CPU | + parent
+    + service PD  | + parent
+    + service LOG | + parent
+    + service Rtc | + any-child
 
-				<domain name="uplink" verbose_packets="no" verbose_packet_drop="no" icmp_echo_server="yes">
++ start accesspoints_report_rom | ram: 2M
+  + binary report_rom
+  + provides
+    + service Report
+    + service ROM
+  + config | verbose: no
+  + route
+    + service ROM | + parent
+    + service CPU | + parent
+    + service PD  | + parent
+    + service LOG | + parent
+    + service Rtc | + any-child
 
-					<nat domain="downlink" tcp-ports="16384"/>
-					<tcp-forward port="443" domain="downlink" to="10.0.3.2"/>
-					<tcp-forward port="80"  domain="downlink" to="10.0.3.2"/>
++ start devices_report_rom | ram: 2M
+  + binary report_rom
+  + provides
+    + service Report
+    + service ROM
+  + config | verbose: yes
+  + route
+    + service ROM | + parent
+    + service CPU | + parent
+    + service PD  | + parent
+    + service LOG | + parent
+    + service Rtc | + any-child
 
-				</domain>
++ start config_rom | ram: 4M
+  + binary dynamic_rom
+  + provides | + service ROM
+  + config | verbose: yes
+  | + rom wifi_config
+  |   + inline | description: disconnect
+  |     + wifi_config} [wifi_config 15 no {}] {
+  |   + sleep  | milliseconds: 15000
+  |   + inline | description: connect
+  |     + wifi_config} [wifi_config 15 no [list "[wifi_ssid] [wifi_wpa] [wifi_psk] yes no"]] {
+  |   + sleep  | milliseconds: 120000
+  + route
+    + service ROM   | + parent
+    + service CPU   | + parent
+    + service PD    | + parent
+    + service LOG   | + parent
+    + service Rtc   | + any-child
+    + service Timer | + child timer
 
-				<domain name="downlink" verbose_packets="no" verbose_packet_drop="no" interface="10.0.3.1/24">
-
-					<dhcp-server ip_first="10.0.3.2" ip_last="10.0.3.2"/>
-
-				</domain>
-
-			</config>
-			<route>
-				<service name="ROM"> <parent/> </service>
-				<service name="CPU"> <parent/> </service>
-				<service name="PD">  <parent/> </service>
-				<service name="LOG"> <parent/> </service>
-				<service name="Timer">    <child name="timer"/> </service>
-			</route>
-		</start>
-
-		<start name="dummy_rtc">
-			<provides> <service name="Rtc"/> </provides>
-			<config year="2023" month="02" day="27" hour="12" minute="0" second="0"/>
-			<route>
-				<any-service> <parent/> </any-service>
-			</route>
-		</start>
-
-		<start name="state_report_rom" ram="2M">
-			<binary name="report_rom"/>
-			<provides> <service name="Report"/> <service name="ROM"/> </provides>
-			<config verbose="no"/>
-			<route>
-				<service name="ROM"> <parent/> </service>
-				<service name="CPU"> <parent/> </service>
-				<service name="PD">  <parent/> </service>
-				<service name="LOG"> <parent/> </service>
-				<service name="Rtc"> <any-child/> </service>
-			</route>
-		</start>
-
-		<start name="accesspoints_report_rom" ram="2M">
-			<binary name="report_rom"/>
-			<provides> <service name="Report"/> <service name="ROM"/> </provides>
-			<config verbose="no"/>
-			<route>
-				<service name="ROM"> <parent/> </service>
-				<service name="CPU"> <parent/> </service>
-				<service name="PD">  <parent/> </service>
-				<service name="LOG"> <parent/> </service>
-				<service name="Rtc"> <any-child/> </service>
-			</route>
-		</start>
-
-		<start name="devices_report_rom" ram="2M">
-			<binary name="report_rom"/>
-			<provides> <service name="Report"/> <service name="ROM"/> </provides>
-			<config verbose="yes"/>
-			<route>
-				<service name="ROM"> <parent/> </service>
-				<service name="CPU"> <parent/> </service>
-				<service name="PD">  <parent/> </service>
-				<service name="LOG"> <parent/> </service>
-				<service name="Rtc"> <any-child/> </service>
-			</route>
-		</start>
-
-		<start name="config_rom" ram="4M">
-			<binary name="dynamic_rom"/>
-			<provides><service name="ROM"/></provides>
-			<config verbose="yes">
-				<rom name="wifi_config">
-					<inline description="disconnect">
-	} [wifi_config 15 no {}] {
-					</inline>
-					<sleep milliseconds="15000"/>
-					<inline description="connect">
-	} [wifi_config 15 no [list "[wifi_ssid] [wifi_wpa] [wifi_psk] yes no"]] {
-					</inline>
-					<sleep milliseconds="120000"/>
-				</rom>
-			</config>
-			<route>
-				<service name="ROM"> <parent/> </service>
-				<service name="CPU"> <parent/> </service>
-				<service name="PD">  <parent/> </service>
-				<service name="LOG"> <parent/> </service>
-				<service name="Rtc"> <any-child/> </service>
-				<service name="Timer"> <child name="timer"/> </service>
-			</route>
-		</start>
-
-		<start name="wifi" caps="250" ram="32M" priority="-1">
-			<config ld_verbose="yes">
-				<report mac_address="true"/>
-				<libc stdout="/dev/log" stderr="/dev/null" rtc="/dev/rtc" rng="/dev/urandom"/>
-				<vfs>
-					<dir name="dev"> <log/> <null/> <rtc/>
-						<jitterentropy name="random"/>
-						<jitterentropy name="urandom"/>
-					</dir>
-					<dir name="firmware">
-						<tar name="wifi_firmware.tar"/>
-					</dir>
-				</vfs>
-			</config>
-			<route>
-				<service name="Uplink"> <child name="nic_router"/> </service>
-				<service name="ROM" label="wifi.lib.so">
-					<parent label="imx8mp_qcacld2_wifi.lib.so"/> </service>
-				<service name="ROM" label="wifi_firmware.tar">
-					<parent label="imx8mp_qcacld2_wifi_firmware.tar"/> </service>
-				<service name="ROM" label="dtb">
-					<parent label="wifi-} [board] {.dtb"/> </service>
-				<service name="Report" label="accesspoints">
-					<child name="accesspoints_report_rom"/> </service>
-				<service name="Report" label="state">
-					<child name="state_report_rom"/> </service>
-				<service name="Report" label="devices">
-					<child name="devices_report_rom"/> </service>
-				<service name="ROM" label="wifi_config">
-					<child name="config_rom"/> </service>
-				<service name="ROM"> <parent/> </service>
-				<service name="CPU"> <parent/> </service>
-				<service name="PD">  <parent/> </service>
-				<service name="LOG"> <parent/> </service>
-				<service name="Rtc"> <any-child/> </service>
-				<service name="Timer">    <child name="timer"/> </service>
-				<service name="Platform"> <child name="platform"/> </service>
-			</route>
-		</start>
-
-	</config>
++ start wifi | caps: 250 | ram: 32M | priority: -1
+  + config | ld_verbose: yes
+  | + report | mac_address: true
+  | + libc | stdout: /dev/log | stderr: /dev/null | rtc: /dev/rtc | rng: /dev/urandom
+  | + vfs
+  |   + dir dev
+  |     + log
+  |     + null
+  |     + rtc
+  |     + jitterentropy random
+  |     + jitterentropy urandom
+  |   + dir firmware
+  |     + tar wifi_firmware.tar
+  + route
+    + service Uplink                            | + child nic_router
+    + service ROM    | label: wifi.lib.so       | + parent | label: imx8mp_qcacld2_wifi.lib.so
+    + service ROM    | label: wifi_firmware.tar | + parent | label: imx8mp_qcacld2_wifi_firmware.tar
+    + service ROM    | label: dtb               | + parent | label: wifi-} [board] {.dtb
+    + service Report | label: accesspoints      | + child accesspoints_report_rom
+    + service Report | label: state             | + child state_report_rom
+    + service Report | label: devices           | + child devices_report_rom
+    + service ROM    | label: wifi_config       | + child config_rom
+    + service ROM                               | + parent
+    + service CPU                               | + parent
+    + service PD                                | + parent
+    + service LOG                               | + parent
+    + service Rtc                               | + any-child
+    + service Timer                             | + child timer
+    + service Platform                          | + child platform
+-
 }
 
 build_boot_image [list {*}[build_artifacts] wifi-mnt_pocket.dtb]

@@ -22,139 +22,122 @@ append_if [have_board mnt_reform2] build_components {
 build $build_components
 
 set config {
-<config>
-	<parent-provides>
-		<service name="ROM"/>
-		<service name="IRQ"/>
-		<service name="IO_MEM"/>
-		<service name="IO_PORT"/>
-		<service name="PD"/>
-		<service name="RM"/>
-		<service name="CPU"/>
-		<service name="LOG"/>
-	</parent-provides>
-	<default-route>
-		<any-service> <parent/> <any-child/> </any-service>
-	</default-route>
-	<default caps="100" ram="1M"/>
+config
++ parent-provides
+  + service ROM
+  + service IRQ
+  + service IO_MEM
+  + service IO_PORT
+  + service PD
+  + service RM
+  + service CPU
+  + service LOG
 
-	<start name="timer">
-		<provides><service name="Timer"/></provides>
-	</start>
++ default-route
+  + any-service
+    + parent
+    + any-child
 
-	<start name="platform" caps="150" managing_system="yes">
-		<binary name="imx8mq_platform"/>
-		<provides> <service name="Platform"/> </provides>
-		<config>
-			<policy label="fb -> " info="yes">
-				<device name="dcss"/>
-				<device name="hdmi"/>
-				<device name="irqsteer"/>}
++ default | caps: 100 | ram: 1M
+
++ start timer
+  + provides | + service Timer
+
++ start platform | caps: 150 | managing_system: yes
+  + binary imx8mq_platform
+  + provides | + service Platform
+  + route | + any-service | + parent
+  + config
+    + policy | label: fb ->  | info: yes
+      + device dcss
+      + device hdmi
+      + device irqsteer}
 append_if [have_board mnt_reform2] config {
-				<device name="mipi_dsi"/>
-				<device name="mipi_dsi_phy"/>
-				<device name="lcd"/>
-				<device name="pclk"/>
-				<device name="esc"/>
-				<device name="dpi"/>
-			</policy>
-
-			<policy label="imx8mq_pwm -> ">
-				<device name="pwm"/>
-			</policy>
-
-			<policy label="gpio -> " info="yes">
-				<device name="gpio1"/>
-				<device name="gpio2"/>
-				<device name="gpio3"/>
-				<device name="gpio4"/>
-				<device name="gpio5"/>
-			</policy>
-
-			<policy label="i2c -> ">
-				<device name="i2c"/>}
-append config {
-			</policy>
-		</config>
-		<route> <any-service> <parent/> </any-service> </route>
-	</start>}
-
-append_if [have_board mnt_reform2] config {
-	<start name="gpio" caps="150" ram="2M">
-		<binary name="imx_pio"/>
-		<provides>
-			<service name="Pin_state"/>
-			<service name="Pin_control"/>
-			<service name="IRQ"/>
-		</provides>
-		<route>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Platform"> <child name="platform"/> </service>
-		</route>
-		<config>
-			<out name="backlight"  index="10" bank="0" default="on"/>
-			<out name="edp_bridge" index="20" bank="2" default="on"/>
-		</config>
-	</start>
-
-	<start name="i2c" caps="150" ram="2M">
-		<binary name="imx8q_evk_i2c"/>
-		<provides><service name="I2c"/></provides>
-		<route>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Platform"> <child name="platform"/> </service>
-			<service name="Timer">    <child name="timer"/>    </service>
-		</route>
-		<config verbose="yes">
-			 <policy label_prefix="fb" bus_address="0x2c"/>
-		</config>
-	</start>
-
-	<start name="imx8mq_pwm" caps="100" ram="2M">
-		<route>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Platform"> <child name="platform"/> </service>
-		</route>
-		<config period="248" sample="250" clock_source="ipg_highfreq"/>
-	</start>}
+      + device mipi_dsi
+      + device mipi_dsi_phy
+      + device lcd
+      + device pclk
+      + device esc
+      + device dpi
+    + policy | label: imx8mq_pwm ->
+      + device pwm
+    + policy | label: gpio ->  | info: yes
+      + device gpio1
+      + device gpio2
+      + device gpio3
+      + device gpio4
+      + device gpio5
+    + policy | label: i2c ->
+      + device i2c}
 
 append config {
-	<start name="fb" caps="250" ram="128M">
-		<binary name="imx8mq_fb"/>
-		<route>
-			<service name="ROM" label="dtb"> <parent label="} imx8mq_fb-[board].dtb {"/> </service>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Timer">    <child name="timer"/>            </service>
-			<service name="Platform"> <child name="platform"/>         </service>
-			<service name="Capture">  <child name="test-framebuffer"/> </service>}
+}
+
 append_if [have_board mnt_reform2] config {
-			<service name="I2c">      <child name="i2c"/>              </service>}
++ start gpio | caps: 150 | ram: 2M
+  + binary imx_pio
+  + provides
+    + service Pin_state
+    + service Pin_control
+    + service IRQ
+  + config
+    + out backlight  | index: 10 | bank: 0 | default: on
+    + out edp_bridge | index: 20 | bank: 2 | default: on
+  + route
+    + service RM       | + parent
+    + service ROM      | + parent
+    + service PD       | + parent
+    + service CPU      | + parent
+    + service LOG      | + parent
+    + service Platform | + child platform
+
++ start i2c | caps: 150 | ram: 2M
+  + binary imx8q_evk_i2c
+  + provides | + service I2c
+  + config | verbose: yes
+    + policy | label_prefix: fb | bus_address: 0x2c
+  + route
+    + service RM       | + parent
+    + service ROM      | + parent
+    + service PD       | + parent
+    + service CPU      | + parent
+    + service LOG      | + parent
+    + service Platform | + child platform
+    + service Timer    | + child timer
+
++ start imx8mq_pwm | caps: 100 | ram: 2M
+  + config | period: 248 | sample: 250 | clock_source: ipg_highfreq
+  + route
+    + service RM       | + parent
+    + service ROM      | + parent
+    + service PD       | + parent
+    + service CPU      | + parent
+    + service LOG      | + parent
+    + service Platform | + child platform
+}
+
 append config {
-		</route>
-	</start>
++ start fb | caps: 250 | ram: 128M
+  + binary imx8mq_fb
+  + route
+    + service ROM | label: dtb | + parent | label: } imx8mq_fb-[board].dtb {
+    + service RM               | + parent
+    + service ROM              | + parent
+    + service PD               | + parent
+    + service CPU              | + parent
+    + service LOG              | + parent
+    + service Timer            | + child timer
+    + service Platform         | + child platform
+    + service Capture          | + child test-framebuffer}
+append_if [have_board mnt_reform2] config {
+    + service I2c              | + child i2c}
+append config {
 
-	<start name="test-framebuffer" ram="10M">
-		<provides> <service name="Capture"/> </provides>
-		<config/>
-	</start>
-
-</config>}
++ start test-framebuffer | ram: 10M
+  + provides | + service Capture
+  + config
+-
+}
 
 install_config $config
 

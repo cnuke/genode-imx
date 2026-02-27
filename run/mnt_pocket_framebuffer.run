@@ -24,101 +24,88 @@ append_if [have_board mnt_reform2] build_components {
 
 build $build_components
 
-set config {
-<config verbose="yes">
-	<parent-provides>
-		<service name="ROM"/>
-		<service name="IRQ"/>
-		<service name="IO_MEM"/>
-		<service name="IO_PORT"/>
-		<service name="PD"/>
-		<service name="RM"/>
-		<service name="CPU"/>
-		<service name="LOG"/>
-	</parent-provides>
-	<default-route>
-		<any-service> <parent/> <any-child/> </any-service>
-	</default-route>
-	<default caps="100" ram="1M"/>
+install_config {
+config | verbose: yes
++ parent-provides
+  + service ROM
+  + service IRQ
+  + service IO_MEM
+  + service IO_PORT
+  + service PD
+  + service RM
+  + service CPU
+  + service LOG
 
-	<start name="timer">
-		<provides><service name="Timer"/></provides>
-	</start>
++ default-route
+  + any-service
+    + parent
+    + any-child
 
-	<start name="black_hole" ram="2M">
-		<provides> <service name="ROM"/> </provides>
-		<config> <rom/> </config>
-		<route> <any-service> <parent/> </any-service> </route>
-	</start>
++ default | caps: 100 | ram: 1M
 
-	<start name="platform" caps="150" managing_system="yes">
-		<binary name="imx8mp_platform"/>
-		<provides> <service name="Platform"/> </provides>
-		<config system_rom="false" verbose="no">
-			<policy label="fb -> " info="yes">
-				<device name="irqsteer"/>
-				<device name="mipi_dsi"/>
-				<device name="lcdif1"/>
-			</policy>
-			<policy label="gpio -> " info="yes">
-				<device name="gpio1"/>
-				<device name="gpio2"/>
-				<device name="gpio3"/>
-				<device name="gpio4"/>
-				<device name="gpio5"/>
-			</policy>
-		</config>
-		<route>
-			<service name="ROM" label="system"> <child name="black_hole"/> </service>
-			<any-service> <parent/> </any-service>
-		</route>
-	</start>
++ start timer
+  + provides | + service Timer
 
-	<start name="gpio" caps="150" ram="2M">
-		<binary name="imx_pio"/>
-		<provides>
-			<service name="Pin_state"/>
-			<service name="Pin_control"/>
-			<service name="IRQ"/>
-		</provides>
-		<route>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Platform"> <child name="platform"/> </service>
-		</route>
-		<config>
-			<out name="panel" index="7" bank="0" default="on"/>
-		</config>
-	</start>
++ start black_hole | ram: 2M
+  + provides | + service ROM
+  + config | + rom
+  + route
+    + any-service | + parent
+
++ start platform | caps: 150 | managing_system: yes
+  + binary imx8mp_platform
+  + provides | + service Platform
+  + config | system_rom: false | verbose: no
+  |
+  | + policy | label: fb -> | info: yes
+  |   + device irqsteer
+  |   + device mipi_dsi
+  |   + device lcdif1
+  |
+  | + policy | label: gpio -> | info: yes
+  |   + device gpio1
+  |   + device gpio2
+  |   + device gpio3
+  |   + device gpio4
+  |   + device gpio5
+  + route
+    + service ROM | label: system | + child black_hole
+    + any-service                 | + parent
+
++ start gpio | caps: 150 | ram: 2M
+  + binary imx_pio
+  + provides
+    + service Pin_state
+    + service Pin_control
+    + service IRQ
+  + config
+    + out panel | index: 7 | bank: 0 | default: on
+  + route
+    + service RM       | + parent
+    + service ROM      | + parent
+    + service PD       | + parent
+    + service CPU      | + parent
+    + service LOG      | + parent
+    + service Platform | + child platform
+
++ start fb | caps: 250 | ram: 128M
+  + binary imx8mq_fb
+  + route
+    + service ROM | label: dtb | + parent | label: } imx8mq_fb-[board].dtb {
+    + service RM               | + parent
+    + service ROM              | + parent
+    + service PD               | + parent
+    + service CPU              | + parent
+    + service LOG              | + parent
+    + service Timer            | + child timer
+    + service Platform         | + child platform
+    + service Capture          | + child test-framebuffer
+
++ start test-framebuffer | ram: 10M
+  + provides | + service Capture
+  + config
+-
 }
-
-append config {
-	<start name="fb" caps="250" ram="128M">
-		<binary name="imx8mq_fb"/>
-		<route>
-			<service name="ROM" label="dtb"> <parent label="} imx8mq_fb-[board].dtb {"/> </service>
-			<service name="RM">       <parent/> </service>
-			<service name="ROM">      <parent/> </service>
-			<service name="PD">       <parent/> </service>
-			<service name="CPU">      <parent/> </service>
-			<service name="LOG">      <parent/> </service>
-			<service name="Timer">    <child name="timer"/>            </service>
-			<service name="Platform"> <child name="platform"/>         </service>
-			<service name="Capture">  <child name="test-framebuffer"/> </service>
-		</route>
-	</start>
-
-	<start name="test-framebuffer" ram="10M">
-		<provides> <service name="Capture"/> </provides>
-		<config/>
-	</start>
-
-</config>}
-
-install_config $config
 
 build_boot_image [build_artifacts]
 
