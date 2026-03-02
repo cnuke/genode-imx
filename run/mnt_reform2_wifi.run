@@ -34,20 +34,6 @@ build $build_components
 # Generate config
 #
 
-proc quoted_wifi_config { args } {
-	set xml [wifi_config {*}$args]
-	set hid [exec [genode_dir]/tool/hid --import-xml format - << $xml]
-	set result ""
-	foreach line [split $hid "\n"] {
-		if {$line == "wifi_config"} {
-			append result "+ wifi_config"
-		} elseif {$line != "-"} {
-			append result "\n          $line"
-		}
-	}
-	return $result
-}
-
 install_config {
 config | verbose: yes | prio_levels: 2
 + parent-provides
@@ -185,16 +171,16 @@ config | verbose: yes | prio_levels: 2
   + config | verbose: yes
     + rom wifi_config
       + inline | description: disconnect
-        } [quoted_wifi_config 5 10 no {}] {
+} [wifi_config 5 10 no {}] {
       + sleep  | milliseconds: 15000
       + inline | description: connect
-        } [quoted_wifi_config 5 10 no [list "[wifi_ssid] [wifi_wpa] [wifi_psk] no"]] {
+} [wifi_config 5 10 no [list "[wifi_ssid] [wifi_wpa] [wifi_psk] no"]] {
       + sleep  | milliseconds: 60000
       + inline | description: rfkill block
-        } [quoted_wifi_config 5 10 yes [list "[wifi_ssid] [wifi_wpa] [wifi_psk] no"]] {
+} [wifi_config 5 10 yes [list "[wifi_ssid] [wifi_wpa] [wifi_psk] no"]] {
       + sleep  | milliseconds: 30000
       + inline | description: rfkill unblock
-        } [quoted_wifi_config 5 10 no [list "[wifi_ssid] [wifi_wpa] [wifi_psk] no"]] {
+} [wifi_config 5 10 no [list "[wifi_ssid] [wifi_wpa] [wifi_psk] no"]] {
       + sleep  | milliseconds: 30000
 
 + start nic_router | caps: 150 | ram: 8M

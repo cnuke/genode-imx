@@ -1,19 +1,4 @@
-proc wifi_ssid { } {
-	return $::env(GENODE_WIFI_SSID)
-}
-
-proc wifi_psk { } {
-	return $::env(GENODE_WIFI_PSK)
-}
-
-
-proc wifi_wpa { } {
-	if {![info exists ::env(GENODE_WIFI_WPA)]} {
-		return WPA2
-	}
-	return $::env(GENODE_WIFI_WPA)
-}
-
+source ${genode_dir}/repos/dde_linux/run/wifi_config.inc
 
 create_boot_directory
 import_from_depot [depot_user]/src/[base_src] \
@@ -38,36 +23,6 @@ build {
 	server/report_rom
 	lib/vfs_lwip
 	test/lwip/http_srv
-}
-
-#
-# wifi config generator (supporting a network list)
-#
-# You may script your tests with this function in the dynamic_rom config below.
-# The syntax for the networks parameter is
-#
-#   { ssid protection passphrase explicit_scan }
-#
-
-set wifi_verbose "no"
-
-proc wifi_config { scan_interval rfkill networks } {
-	global wifi_verbose
-	global wifi_verbose_state
-
-	append config " | verbose: "       $wifi_verbose \
-	              " | scan_interval: " $scan_interval \
-	              " | rfkill: "        $rfkill
-
-	set indent "  |     "
-	foreach n $networks {
-		append config "\n$indent  + network | ssid: "          [lindex $n 0] \
-		                                " | protection:"     [lindex $n 1] \
-		                                " | passphrase:"     [lindex $n 2] \
-		                                " | auto_connect:"   [lindex $n 3] \
-		                                " | explicit_scan:"  [lindex $n 4]
-	}
-	return $config
 }
 
 install_config {
@@ -209,13 +164,13 @@ config | prio_levels: 2
   + binary dynamic_rom
   + provides | + service ROM
   + config | verbose: yes
-  | + rom wifi_config
-  |   + inline | description: disconnect
-  |     + wifi_config} [wifi_config 15 no {}] {
-  |   + sleep  | milliseconds: 15000
-  |   + inline | description: connect
-  |     + wifi_config} [wifi_config 15 no [list "[wifi_ssid] [wifi_wpa] [wifi_psk] yes no"]] {
-  |   + sleep  | milliseconds: 120000
+    + rom wifi_config
+      + inline | description: disconnect
+} [wifi_config 5 10 no {}] {
+      + sleep  | milliseconds: 15000
+      + inline | description: connect
+} [wifi_config 5 10 no [list "[wifi_ssid] [wifi_wpa] [wifi_psk] yes no"]] {
+      + sleep  | milliseconds: 120000
   + route
     + service ROM   | + parent
     + service CPU   | + parent
