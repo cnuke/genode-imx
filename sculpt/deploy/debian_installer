@@ -1,5 +1,6 @@
 deploy | info: Debian Installer using ARM VMM
 
++ option sculpt
 + option managed
 + option black_hole
 + option recall_fs

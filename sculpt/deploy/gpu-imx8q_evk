@@ -1,5 +1,6 @@
 deploy | info: gpu test for i.MX 8MQ GPU
 
++ option sculpt
 + option managed
 
 + child gpu_test | pkg: glmark2-imx8q_evk
