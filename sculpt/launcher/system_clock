@@ -1,3 +1,0 @@
-launcher | pkg: sntp_dummy_rtc | priority: -1
-+ route | + service Nic | + child nic_router
--
