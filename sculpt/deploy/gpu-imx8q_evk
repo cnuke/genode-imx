@@ -8,6 +8,8 @@ config | arch:
   + service LOG                         | + parent
   + service Timer                       | + parent
 
++ option managed
+
 + start gpu_test | pkg: glmark2-imx8q_evk
   + route
     + service Platform | + parent | label: gpu

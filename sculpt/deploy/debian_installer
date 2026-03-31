@@ -8,6 +8,8 @@ config | arch: | info: Debian Installer using ARM VMM
   + service LOG                         | + parent
   + service Timer                       | + parent
 
++ option managed
+
 + start window_layouter | priority: -1 | pkg: window_layouter
   + route
     + service Gui                                   | + child wm
