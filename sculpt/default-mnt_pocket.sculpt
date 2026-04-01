@@ -1,4 +1,4 @@
-drivers: mnt_pocket
+platform: mnt_pocket
 event_filter: mnt_pocket
 
 # supplemental depot content added to the system image

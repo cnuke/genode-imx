@@ -29,24 +29,24 @@ config
   + config
   | + report | devices: yes
   |
-  | + policy | label_prefix: runtime -> usb | info: yes
+  | + policy | label: usb | info: yes
   |   + device usb_host_1
   |   + device usb_phy_1
   |   + device usb_host_2
   |   + device usb_phy_2
   |
-  | + policy | label_prefix: runtime -> fb | info: yes
+  | + policy | label: fb | info: yes
   |   + device dcss
   |   + device hdmi
   |   + device irqsteer
   |
-  | + policy | label_prefix: runtime -> mmc | info: yes
+  | + policy | label: mmc | info: yes
   |   + device usdhc2
   |
-  | + policy | label_prefix: runtime -> nic | info: yes
+  | + policy | label: nic | info: yes
   |   + device fec
   |
-  | + policy | label_prefix: runtime -> gpu | info: yes
+  | + policy | label: gpu | info: yes
   |   + device gpu
   |
   + route | + any-service | + parent

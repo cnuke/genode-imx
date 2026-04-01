@@ -9,8 +9,6 @@ config
   + service LOG
   + service Timer
   + service Report
-  + service Capture
-  + service Event
 
 + report | child_caps: yes | child_ram: yes | init_caps: yes | init_ram: yes
          | delay_ms: 5000
@@ -64,7 +62,7 @@ config
   + config | ld_verbose: yes
   | + report | devices: yes
   |
-  | + policy | label_prefix: runtime -> fb | info: yes
+  | + policy | label: fb | info: yes
   |   + device dcss
   |   + device hdmi
   |   + device mipi_dsi
@@ -78,7 +76,7 @@ config
   | + policy | label: imx8mq_pwm ->
   |   + device pwm
   |
-  | + policy | label: gpio ->  | info: yes
+  | + policy | label: gpio -> | info: yes
   |   + device gpio1
   |   + device gpio2
   |   + device gpio3
@@ -88,30 +86,30 @@ config
   | + policy | label: i2c ->
   |   + device i2c
   |
-  | + policy | label_prefix: runtime -> usb | info: yes
+  | + policy | label: usb | info: yes
   |   + device usb_host_1
   |   + device usb_phy_1
   |   + device usb_host_2
   |   + device usb_phy_2
   |
-  | + policy | label_prefix: runtime -> mmc | info: yes
+  | + policy | label: mmc | info: yes
   |   + device usdhc1
   |   + device usdhc2
   |
-  | + policy | label: runtime -> nic | info: yes
+  | + policy | label: nic | info: yes
   |   + device fec
   |
-  | + policy | label: runtime -> gpu | info: yes
+  | + policy | label: gpu | info: yes
   |   + device gpu
   |
   | + policy | label: imx8mq_pci_host -> | info: yes
   |   + device pcie_1
   |   + device pcie_2
   |
-  | + policy | label_prefix: runtime -> nvme | info: yes
+  | + policy | label: nvme | info: yes
   |   + pci | class: NVME
   |
-  | + policy | label_prefix: runtime -> wifi | info: yes
+  | + policy | label: wifi | info: yes
   |   + pci | class: WIFI
   |
   + route
@@ -155,7 +153,7 @@ config
   + binary imx8q_evk_i2c
   + provides | + service I2c
   + config | verbose: yes
-    + policy | label_prefix: runtime -> fb | bus_address: 0x2c
+    + policy | label: fb -> | bus_address: 0x2c
   + route
     + service RM       | + parent
     + service ROM      | + parent

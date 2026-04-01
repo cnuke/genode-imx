@@ -28,7 +28,7 @@ config
   + config | ld_verbose: yes
   | + report | devices: yes
   |
-  | + policy | label_prefix: runtime -> fb | info: yes
+  | + policy | label: fb | info: yes
   |   + device hdmimix_pd
   |   + device hdmi_pd
   |   + device hdmi
@@ -46,11 +46,11 @@ config
   |   + device gpio4
   |   + device gpio5
   |
-  | + policy | label_prefix: runtime -> mmc | info: yes
+  | + policy | label: mmc | info: yes
   |   + device usdhc1
   |   + device usdhc3
   |
-  | + policy | label_prefix: runtime -> usb | info: yes
+  | + policy | label: usb | info: yes
   |   + device usb3_phy0
   |   + device usb3_0
   |   + device usb_dwc3_0
@@ -58,7 +58,7 @@ config
   |   + device usb3_1
   |   + device usb_dwc3_1
   |
-  | + policy | label_prefix: runtime -> nic | info: yes
+  | + policy | label: nic | info: yes
   |   + device fec
   |
   + route

@@ -1,0 +1,27 @@
+option
+
++ child platform | binary: init | caps: 1500 | ram: 32M | managing_system: yes
+  + provides
+    + i2c
+    + platform
+  + connect
+    + rom config          | + parent | label: config -> platform
+    + rom system          | + parent | label: config -> system
+    + report              | + child report
+    + rm                  | + parent
+    + io_mem              | + parent
+    + io_port             | + parent
+    + irq                 | + parent
+    + event               | + child event_filter
+    + rom devices         | + parent
+    + rom imx8mq_pci_host | + parent
+    + rom imx8mq_platform | + parent
+    + rom imx8mq_pwm      | + parent
+    + rom imx8q_evk_i2c   | + parent
+    + rom imx_pio         | + parent
+    + rom ld.lib.so       | + parent
+    + rom platform_info   | + parent
+    + rom report_rom      | + parent
+    + rom rom_filter      | + parent
+    + rom rom_reporter    | + parent
+-

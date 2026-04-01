@@ -9,8 +9,6 @@ config
   + service LOG
   + service Timer
   + service Report
-  + service Capture
-  + service Event
 
 + report | child_caps: yes | child_ram: yes | init_caps: yes | init_ram: yes
          | delay_ms:   5000
@@ -30,7 +28,7 @@ config
   + config | ld_verbose: yes
   | + report | devices: yes
   |
-  | + policy | label_prefix: runtime -> fb | info: yes
+  | + policy | label: fb | info: yes
   |   + device irqsteer
   |   + device mipi_dsi
   |   + device lcdif1
@@ -42,7 +40,7 @@ config
   |   + device gpio4
   |   + device gpio5
   |
-  | + policy | label_prefix: runtime -> usb | info: yes
+  | + policy | label: usb | info: yes
   |   + device usb3_phy0
   |   + device usb3_0
   |   + device usb_dwc3_0
@@ -50,14 +48,14 @@ config
   |   + device usb3_1
   |   + device usb_dwc3_1
   |
-  | + policy | label_prefix: runtime -> mmc | info: yes
+  | + policy | label: mmc | info: yes
   |   + device usdhc1
   |   + device usdhc3
   |
-  | + policy | label_prefix: runtime -> nic | info: yes
+  | + policy | label: nic | info: yes
   |   + device eqos
   |
-  | + policy | label_prefix: runtime -> wifi | info: yes
+  | + policy | label: wifi | info: yes
   |   + device usdhc2
   |
   + route

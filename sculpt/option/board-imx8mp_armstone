@@ -1,0 +1,20 @@
+option
+
++ child platform | binary: init | caps: 1500 | ram: 32M | managing_system: yes
+  + provides
+    + platform
+  + connect
+    + rom config          | + parent | label: config -> platform
+    + rom system          | + parent | label: config -> system
+    + report              | + child report
+    + rm                  | + parent
+    + io_mem              | + parent
+    + io_port             | + parent
+    + irq                 | + parent
+    + event               | + child event_filter
+    + rom devices         | + parent
+    + rom imx8mp_platform | + parent
+    + rom imx_pio         | + parent
+    + rom ld.lib.so       | + parent
+    + rom platform_info   | + parent
+-
