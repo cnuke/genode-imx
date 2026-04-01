@@ -5,7 +5,7 @@ option
     + i2c
     + platform
   + connect
-    + rom config          | + parent | label: config -> platform
+    + rom config          | + parent | label: config -> child/platform
     + rom system          | + parent | label: config -> system
     + report              | + child report
     + rm                  | + parent
