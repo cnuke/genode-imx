@@ -1,0 +1,10 @@
+option
++ child nic | binary: fec_nic | ram: 20M | caps: 300 | priority: -3
+  + config
+  + connect
+    + platform    | + child platform   | label: nic
+    + uplink      | + child nic_router | label: nic
+    + report      | + child report
+    + rom nic.dtb | + parent | label: fec_nic-imx8mp_armstone.dtb
+    + rm          | + parent
+-
