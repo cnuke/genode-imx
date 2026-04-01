@@ -7,5 +7,5 @@ deploy | info: gpu test for i.MX 8MQ GPU
 + child gpu_test | pkg: glmark2-imx8q_evk
   + connect
     + platform | + child platform | label: gpu
-    + gui      | + parent
+    + gui      | + child gui
 -
