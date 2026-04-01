@@ -33,7 +33,7 @@ deploy | info: Debian Installer using ARM VMM
 
 + child fonts_fs | priority: -2 | pkg: fonts_fs
   + connect
-    + rom config | + parent | label: config -> fonts
+    + rom config | + child model | label: fonts
 
 + child wm_backdrop | priority: -2 | pkg: sticks_blue_backdrop
   + connect
