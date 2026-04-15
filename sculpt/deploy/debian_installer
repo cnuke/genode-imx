@@ -48,7 +48,7 @@ deploy | info: Debian Installer using ARM VMM
 
 + child debian_installer | pkg: skalk/pkg/vmm-debian-installer-arm64/2023-10-23
   + connect
-    + nic | + child nic_router
+    + nic | + child network
     + fs  | + child recall_fs
     + gui | + child wm
     + vm  | + parent

@@ -36,7 +36,7 @@ deploy | info: disposable web browser
 
 + child falkon | ram: 1G | priority: -2 | pkg: cproc/pkg/falkon/2025-10-27
   + connect
-    + nic                    | + child nic_router
+    + nic                    | + child network
     + rtc                    | + child system_clock
     + play                   | + child black_hole
     + record                 | + child black_hole

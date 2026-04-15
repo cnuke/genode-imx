@@ -14,8 +14,8 @@ option
   |   + dir firmware
   |     + tar wifi_firmware.tar
   + connect
-    + platform                      | + child platform   | label: wifi
-    + uplink                        | + child nic_router | label: wifi
+    + platform                      | + child platform | label: wifi
+    + uplink                        | + child network  | label: wifi
     + report                        | + child report
     + rom libcrypto.lib.so          | + parent
     + rom vfs.lib.so                | + parent

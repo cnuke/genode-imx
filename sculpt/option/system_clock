@@ -1,4 +1,4 @@
 option
   + child system_clock | pkg: sntp_dummy_rtc | priority: -1
-    + connect | nic | + child nic_router
+    + connect | nic | + child network
 -
