@@ -9,6 +9,7 @@ _/src/imx8mq_platform
 _/src/imx8mq_pwm
 _/src/imx8mq_sd_card
 _/src/imx8m_usb_host
+_/src/mnt_reform2_discover
 _/src/nvme
 _/src/rom_filter
 _/src/rom_reporter

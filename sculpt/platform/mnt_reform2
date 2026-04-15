@@ -153,7 +153,7 @@ config
   + binary imx8q_evk_i2c
   + provides | + service I2c
   + config | verbose: yes
-    + policy | label: fb -> | bus_address: 0x2c
+    + policy | label: fb | bus_address: 0x2c
   + route
     + service RM       | + parent
     + service ROM      | + parent

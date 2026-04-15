@@ -16,4 +16,33 @@ option
     + rom imx8mq_platform | + parent
     + rom ld.lib.so       | + parent
     + rom platform_info   | + parent
+
++ child fb | binary: imx8mq_fb | ram: 20M | caps: 250 | priority: -2
+  + connect
+    + platform         | + child platform | label: fb
+    + capture          | + child gui
+    + report           | + child report
+    + rom config       | + child model    | label: fb
+    + rom dtb          | + parent         | label: imx8mq_fb-imx8q_evk.dtb
+    + rm               | + parent
+
++ child mmc | binary: imx8mq_sd_card | ram: 16M | caps: 500 | priority: -2
+  + provides | + block
+  + config | report: yes
+    + policy | label: mmcblk0 | device: mmcblk0 | writeable: yes
+    + policy | label: mmcblk1 | device: mmcblk1 | writeable: yes
+  + connect
+    + platform   | + child platform | label: mmc
+    + rom dtb    | + parent         | label: imx8mq_sd_card-imx8q_evk.dtb
+    + rom system | + child model    | label: system
+    + report     | + child report
+
++ child usb | binary: imx8m_usb_host | ram: 16M | caps: 200 | priority: -1
+  + provides
+    + usb
+  + connect
+    + platform   | + child platform | label: usb
+    + rom dtb    | + parent         | label: imx8m_usb_host-imx8q_evk.dtb
+    + rom config | + child model    | label: child/usb
+    + report     | + child report
 -

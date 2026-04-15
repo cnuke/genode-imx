@@ -1,9 +1,0 @@
-option
-+ child usb | binary: imx8m_usb_host | ram: 16M | caps: 200 | priority: -2
-  + provides | + usb
-  + connect
-    + platform   | + child platform | label: usb
-    + report     | + child report
-    + rom config | + child model | label: child/usb
-    + rom dtb    | + parent      | label: imx8m_usb_host-imx8mp_armstone.dtb
--

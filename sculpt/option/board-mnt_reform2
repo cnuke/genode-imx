@@ -24,4 +24,62 @@ option
     + rom report_rom      | + parent
     + rom rom_filter      | + parent
     + rom rom_reporter    | + parent
+
++ child discover_report | binary: fs_report | ram: 2M | caps: 100
+  + provides | + report
+  + config | + vfs | + fs
+  + connect
+    + fs             | + child model | identity: rw
+    + rom vfs.lib.so | + parent
+
++ child discover | binary: mnt_reform2_discover | ram: 1M | caps: 100
+  + config
+  + connect
+    + report            | + child discover_report | label: option -> board
+    + rom devices       | + child report          | label: platform/pci_devices
+    + rom board         | + child model           | label: option/board
+    + rom platform_info | + parent
+
++ child fb | binary: imx8mq_fb | ram: 20M | caps: 250 | priority: -2
+  + connect
+    + platform         | + child platform | label: fb
+    + i2c              | + child platform | label: fb
+    + capture          | + child gui
+    + report           | + child report
+    + rom config       | + child model    | label: fb
+    + rom dtb          | + parent         | label: imx8mq_fb-mnt_reform2.dtb
+    + rm               | + parent
+
++ child mmc | binary: imx8mq_sd_card | ram: 16M | caps: 500 | priority: -2
+  + provides | + block
+  + config | report: yes
+    + policy | label: mmcblk0 | device: mmcblk0 | writeable: yes
+    + policy | label: mmcblk1 | device: mmcblk1 | writeable: yes
+  + connect
+    + platform   | + child platform | label: mmc
+    + rom dtb    | + parent         | label: imx8mq_sd_card-mnt_reform2.dtb
+    + rom system | + child model    | label: system
+    + report     | + child report
+
++ child usb | binary: imx8m_usb_host | ram: 16M | caps: 200 | priority: -1
+  + provides
+    + usb
+  + connect
+    + platform   | + child platform | label: usb
+    + rom dtb    | + parent         | label: imx8m_usb_host-mnt_reform2.dtb
+    + rom config | + child model    | label: child/usb
+    + report     | + child report
+
++ child nvme | binary: nvme | ram: 8M | caps: 100 | priority: -2 | enabled: discover
+  + managed | max_ram: 32M | max_caps: 500
+  + provides
+    + block
+  + config | system: yes
+    + report | namespaces: yes
+    + policy | label: 1 | namespace: 1 | writeable: yes
+  + connect
+    + platform   | + child platform | label: nvme
+    + rom system | + child model    | label: system
+    + report     | + child report
+
 -
