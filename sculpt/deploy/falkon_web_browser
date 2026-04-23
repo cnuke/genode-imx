@@ -34,7 +34,7 @@ deploy | info: disposable web browser
     + report | label_last: clipboard | + child clipboard
     + rom    | label_last: clipboard | + child clipboard
 
-+ child falkon | ram: 1G | priority: -2 | pkg: cproc/pkg/falkon/2025-10-27
++ child falkon | ram: 1G | priority: -2 | pkg: cproc/pkg/falkon/2026-04-21
   + connect
     + nic                    | + child network
     + rtc                    | + child system_clock
