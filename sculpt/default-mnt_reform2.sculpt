@@ -4,7 +4,6 @@ platform: mnt_reform2
 import: pkg/sculpt_drivers-mnt_reform2
 
 option: download_debug_info black_hole trace_logger recall_fs mixer system_clock
-option: nic wifi
 
 presets: empty nano3d window_manager falkon_web_browser
 

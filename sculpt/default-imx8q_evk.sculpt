@@ -4,7 +4,6 @@ platform: imx8q_evk
 import: pkg/sculpt_drivers-imx8q_evk
 
 option: download_debug_info black_hole trace_logger recall_fs
-option: nic
 
 presets: empty nano3d window_manager falkon_web_browser
 

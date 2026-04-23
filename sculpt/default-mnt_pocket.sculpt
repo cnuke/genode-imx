@@ -5,7 +5,6 @@ event_filter: mnt_pocket
 import: pkg/sculpt_drivers-mnt_pocket
 
 option: download_debug_info black_hole trace_logger recall_fs mixer system_clock
-option: nic wifi
 
 presets: empty nano3d window_manager falkon_web_browser
 

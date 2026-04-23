@@ -50,7 +50,7 @@ option
     + rom dtb          | + parent         | label: imx8mq_fb-mnt_reform2.dtb
     + rm               | + parent
 
-+ child mmc | binary: imx8mq_sd_card | ram: 16M | caps: 500 | priority: -2
++ child mmc | binary: imx8mq_sd_card | ram: 16M | caps: 500 | priority: -3
   + provides | + block
   + config | report: yes
     + policy | label: mmcblk0 | device: mmcblk0 | writeable: yes
@@ -61,7 +61,7 @@ option
     + rom system | + child model    | label: system
     + report     | + child report
 
-+ child usb | binary: imx8m_usb_host | ram: 16M | caps: 200 | priority: -1
++ child usb | binary: imx8m_usb_host | ram: 16M | caps: 200 | priority: -2
   + provides
     + usb
   + connect
@@ -70,7 +70,16 @@ option
     + rom config | + child model    | label: child/usb
     + report     | + child report
 
-+ child nvme | binary: nvme | ram: 8M | caps: 100 | priority: -2 | enabled: discover
++ child usb_hid | binary: usb_hid | ram: 11M | caps: 180 | priority: -2
+  + config | capslock_led: rom | numlock_led: rom
+  + connect
+    + usb          | + child usb
+    + report       | + child report
+    + rom capslock | + child report | label: global_keys/capslock
+    + rom numlock  | + child report | label: global_keys/numlock
+    + event        | + child event_filter | label: usb_hid
+
++ child nvme | binary: nvme | ram: 8M | caps: 100 | priority: -3 | enabled: discover
   + managed | max_ram: 32M | max_caps: 500
   + provides
     + block
@@ -82,4 +91,43 @@ option
     + rom system | + child model    | label: system
     + report     | + child report
 
++ child nic | binary: fec_nic | ram: 20M | caps: 300 | priority: -3 | enabled: no
+  + config
+  + connect
+    + platform    | + child platform | label: nic
+    + uplink      | + child network  | label: nic
+    + report      | + child report
+    + rom nic.dtb | + parent | label: fec_nic-mnt_reform2.dtb
+    + rm          | + parent
+
++ child wifi | binary: wifi | ram: 16M | caps: 260 | priority: -3 | enabled: no
+  + config
+  | + libc | stdout: /dev/log | stderr: /dev/null | rtc: /dev/rtc
+  | + vfs
+  |   + dir dev
+  |     + null
+  |     + zero
+  |     + log
+  |     + null
+  |     + jitterentropy random
+  |     + jitterentropy urandom
+  |   + inline rtc | : 2018-01-01 00:01
+  |   + dir firmware
+  |     + tar wifi_firmware.tar
+  + connect
+    + platform                      | + child platform | label: wifi
+    + uplink                        | + child network  | label: wifi
+    + report                        | + child report
+    + rom libcrypto.lib.so          | + parent
+    + rom vfs.lib.so                | + parent
+    + rom libc.lib.so               | + parent
+    + rom libm.lib.so               | + parent
+    + rom vfs_jitterentropy.lib.so  | + parent
+    + rom libssl.lib.so             | + parent
+    + rom wifi.lib.so               | + parent | label: imx8mq_wifi.lib.so
+    + rom wifi_firmware.tar         | + parent | label: imx8mq_wifi_firmware.tar
+    + rom wpa_driver_nl80211.lib.so | + parent
+    + rom wpa_supplicant.lib.so     | + parent
+    + rm                            | + parent
+    + rom wifi_config               | + child model | label: child/wifi
 -
