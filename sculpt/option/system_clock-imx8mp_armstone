@@ -1,0 +1,23 @@
+option
+
++ child rtc_report_rom | ram: 1M | caps: 100 | priority: -3 | pkg: report_rom
+  + config | verbose: no
+    + policy | label: system_rtc -> set_rtc | report: chronyd -> set_rtc
+
++ child dummy_rtc | ram: 1M | caps: 100 | priority: -3 | binary: dummy_rtc
+  + provides | + rtc
+  + config
+
++ child system_rtc | ram: 1M | caps: 100 | priority: -3 | binary: system_rtc
+  + provides | + rtc
+  + config | allow_setting_rtc: true
+  + connect
+    + rtc         | + child dummy_rtc
+    + rom set_rtc | + child rtc_report_rom
+
++ child chronyd | caps: 200 | ram: 12M | priority: -3 | pkg: skalk/pkg/chrony/4.6.1-2026-04-22
+  + connect
+    + nic    | + child network
+    + rtc    | + child system_rtc
+    + report | + child rtc_report_rom
+-

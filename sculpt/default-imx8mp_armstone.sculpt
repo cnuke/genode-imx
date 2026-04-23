@@ -1,7 +1,7 @@
 platform: imx8mp_armstone
 
 # supplemental depot content added to the system image
-import: pkg/sculpt_drivers-imx8mp_armstone
+import: pkg/sculpt_drivers-imx8mp_armstone src/system_rtc src/dummy_rtc
 
 option: download_debug_info black_hole trace_logger recall_fs mixer system_clock
 
