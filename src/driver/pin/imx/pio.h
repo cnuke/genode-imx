@@ -36,8 +36,8 @@ struct Pio_driver::Pio
 		};
 
 		Regs                  regs { device, { 0 } };
-		Platform::Device::Irq low  { device, { 0 } };
-		Platform::Device::Irq high { device, { 1 } };
+		Platform::Device::Irq low  { device, Platform::Device::Irq::Type::TYPE_LEGACY, { 0 } };
+		Platform::Device::Irq high { device, Platform::Device::Irq::Type::TYPE_LEGACY, { 1 } };
 
 		void configure(Index index, Attr const &attr)
 		{
