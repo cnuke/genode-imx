@@ -987,30 +987,6 @@ int pci_bridge_wait_for_secondary_bus(struct pci_dev * dev,char * reset_type)
 
 #include <linux/pci.h>
 
-void pci_disable_device(struct pci_dev * dev)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/pci.h>
-
-void pci_disable_msi(struct pci_dev * dev)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/pci.h>
-
-int pci_enable_msix_range(struct pci_dev * dev,struct msix_entry * entries,int minvec,int maxvec)
-{
-	lx_emul_trace_and_stop(__func__);
-}
-
-
-#include <linux/pci.h>
-
 int pci_enable_wake(struct pci_dev * pci_dev,pci_power_t state,bool enable)
 {
 	lx_emul_trace_and_stop(__func__);

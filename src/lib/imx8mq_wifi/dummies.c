@@ -721,15 +721,6 @@ int pci_disable_link_state(struct pci_dev * pdev,int state)
 
 #include <linux/pci.h>
 
-int pci_enable_msi(struct pci_dev * dev)
-{
-	lx_emul_trace(__func__);
-	return -ENOSYS;
-}
-
-
-#include <linux/pci.h>
-
 int pcie_capability_read_word(struct pci_dev * dev,int pos,u16 * val)
 {
 	lx_emul_trace(__func__);
